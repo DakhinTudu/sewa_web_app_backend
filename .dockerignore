@@ -6,7 +6,6 @@
 .mvn/
 mvnw
 mvnw.cmd
-Dockerfile
 docker-compose.yml
 .dockerignore
 sewa-frontend/
