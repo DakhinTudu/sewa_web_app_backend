@@ -1,12 +1,18 @@
 package com.sewa.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
+import java.util.Set;
 
 @Entity
 @Table(name = "roles")
-@Data
-public class Role {
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@EqualsAndHashCode(callSuper = true, exclude = "permissions")
+public class Role extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,5 +23,8 @@ public class Role {
     private String roleName;
 
     private String description;
-}
 
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "role_permissions", joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "permission_id"))
+    private Set<Permission> permissions;
+}

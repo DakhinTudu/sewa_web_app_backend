@@ -1,14 +1,20 @@
 package com.sewa.entity;
 
+import com.sewa.entity.enums.MembershipStatus;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "students")
-@Data
-public class Student {
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@EqualsAndHashCode(callSuper = true)
+public class Student extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,11 +28,14 @@ public class Student {
     @Column(name = "full_name", nullable = false)
     private String fullName;
 
+    @Column(name = "membership_code", unique = true)
+    private String membershipCode;
+
     private String institute;
     private String course;
     private String phone;
-    private String status;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private MembershipStatus status = MembershipStatus.PENDING;
 }

@@ -1,5 +1,7 @@
 package com.sewa.entity;
 
+import com.sewa.entity.enums.CalendarEventType;
+import com.sewa.entity.enums.Visibility;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -13,35 +15,28 @@ public class SewaCalendar {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "calendar_id")
+    @Column(name = "event_id")
     private Integer id;
+
+    @Column(name = "event_date", nullable = false)
+    private LocalDate eventDate;
 
     @Column(nullable = false)
     private String title;
 
     private String description;
-    private String eventType;
 
-    @Column(name = "event_date", nullable = false)
-    private LocalDate eventDate;
-
-    private Boolean isRecurring;
-    private String recurrenceRule;
-    private String visibility;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "event_type")
+    private CalendarEventType eventType; // e.g., MEETING, FESTIVAL
 
     @ManyToOne
     @JoinColumn(name = "chapter_id")
     private Chapter chapter;
 
-    @ManyToOne
-    @JoinColumn(name = "related_member_id")
-    private Member relatedMember;
-
-    @ManyToOne
-    @JoinColumn(name = "created_by")
-    private User createdBy;
+    @Enumerated(EnumType.STRING)
+    private Visibility visibility = Visibility.PUBLIC;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 }
-

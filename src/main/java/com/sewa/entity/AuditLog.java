@@ -1,11 +1,16 @@
 package com.sewa.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "audit_logs")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class AuditLog {
 
     @Id
@@ -19,6 +24,8 @@ public class AuditLog {
 
     private String action;
     private String entity;
+
+    @Column(name = "entity_id")
     private Integer entityId;
 
     @Column(name = "created_at")

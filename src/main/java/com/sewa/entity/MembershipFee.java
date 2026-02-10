@@ -1,7 +1,8 @@
 package com.sewa.entity;
 
+import com.sewa.entity.enums.PaymentStatus;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -9,8 +10,13 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "membership_fees")
-@Data
-public class MembershipFee {
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@EqualsAndHashCode(callSuper = true)
+public class MembershipFee extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,13 +27,22 @@ public class MembershipFee {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @Column(name = "financial_year", nullable = false)
-    private String financialYear;
-
+    @Column(nullable = false)
     private BigDecimal amount;
-    private String paymentStatus;
+
+    @Column(name = "payment_date")
     private LocalDate paymentDate;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_status")
+    private PaymentStatus paymentStatus;
+
+    @Column(name = "transaction_id", unique = true)
+    private String transactionId;
+
+    @Column(name = "fee_type")
+    private String feeType; // e.g., ANNUAL, ENTRANCE
+
+    @Column(name = "financial_year", nullable = false)
+    private String financialYear;
 }

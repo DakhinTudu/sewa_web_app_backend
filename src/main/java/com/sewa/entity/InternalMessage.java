@@ -1,14 +1,20 @@
 package com.sewa.entity;
 
+import com.sewa.entity.enums.Priority;
+import com.sewa.entity.enums.Visibility;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "internal_messages")
 @Data
-public class InternalMessage {
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@EqualsAndHashCode(callSuper = true)
+public class InternalMessage extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,15 +25,20 @@ public class InternalMessage {
     @JoinColumn(name = "sender_id")
     private User sender;
 
+    @Column(nullable = false)
     private String subject;
 
-    @Column(name = "message_body", nullable = false)
-    private String messageBody;
+    @Column(columnDefinition = "TEXT", name = "message_body", nullable = false)
+    private String content;
 
-    private String priority;
-    private String visibility;
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private Priority priority = Priority.NORMAL;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private Visibility visibility = Visibility.PUBLIC;
+
+    @Column(name = "expires_at")
+    private LocalDateTime expiresAt;
 }
-

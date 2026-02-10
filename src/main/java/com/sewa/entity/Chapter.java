@@ -1,14 +1,18 @@
 package com.sewa.entity;
 
+import com.sewa.entity.enums.ChapterType;
 import jakarta.persistence.*;
-import lombok.Data;
-
-import java.time.LocalDateTime;
+import lombok.*;
 
 @Entity
 @Table(name = "chapters")
-@Data
-public class Chapter {
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@EqualsAndHashCode(callSuper = true)
+public class Chapter extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,20 +22,10 @@ public class Chapter {
     @Column(name = "chapter_name", nullable = false)
     private String chapterName;
 
-    private String chapterType;
     private String location;
 
-    @ManyToOne
-    @JoinColumn(name = "coordinator_id")
-    private Member coordinator;
-
-    private String contactEmail;
-    private String contactPhone;
-
-    @Column(name = "is_active")
-    private Boolean active;
-
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "chapter_type")
+    @Builder.Default
+    private ChapterType chapterType = ChapterType.LOCAL;
 }
-

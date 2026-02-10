@@ -1,37 +1,51 @@
 package com.sewa.entity;
 
+import com.sewa.entity.enums.ContentType;
+import com.sewa.entity.enums.Visibility;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "contents")
-@Data
-public class Content {
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@EqualsAndHashCode(callSuper = true)
+public class Content extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "content_id")
     private Integer id;
 
-    private String contentType;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "content_type")
+    private ContentType contentType;
 
     @Column(nullable = false)
     private String title;
 
+    @Column(columnDefinition = "TEXT")
     private String description;
-    private String visibility;
+
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private Visibility visibility = Visibility.PUBLIC;
+
+    @Column(name = "event_date")
     private LocalDate eventDate;
 
     @ManyToOne
-    @JoinColumn(name = "created_by")
-    private User createdBy;
+    @JoinColumn(name = "author_id")
+    private User author;
 
-    private Boolean published;
+    @Builder.Default
+    private Boolean published = true;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    @Column(name = "file_url")
+    private String fileUrl;
 }
-
