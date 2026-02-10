@@ -1,0 +1,48 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: sewa-db
+    environment:
+      POSTGRES_DB: sewa_welfare_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d sewa_welfare_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sewa-network
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sewa-backend
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./uploads:/app/uploads
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/sewa_welfare_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: password
+      FILE_UPLOAD_DIR: /app/uploads
+      SEWA_JWT_SECRET: 9a67471ec639f4ff3b1f8f29810738470a73c5240a1fef3e3f421f6b2c2b7d9c
+      SEWA_JWT_EXPIRATION_MS: 86400000
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - sewa-network
+
+networks:
+  sewa-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

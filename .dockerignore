@@ -1,0 +1,14 @@
+
+.git/
+.idea/
+.vscode/
+*.iml
+.mvn/
+mvnw
+mvnw.cmd
+Dockerfile
+docker-compose.yml
+.dockerignore
+sewa-frontend/
+uploads/
+node_modules/
