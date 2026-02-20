@@ -52,7 +52,7 @@ Your site will be at `https://random-name-12345.netlify.app` (or a custom domain
 
 ## SPA routing
 
-`netlify.toml` includes a redirect so all routes (e.g. `/dashboard`, `/login`) serve `index.html`; React Router then handles the path. No extra config needed.
+Both `netlify.toml` and `public/_redirects` tell Netlify to serve `index.html` for every path (`/*` → 200). The `_redirects` file is copied into `dist` by Vite, so Netlify always has it. If you get “Page not found” on refresh or direct links, confirm **Base directory** is `sewa-frontend` and redeploy.
 
 ---
 
