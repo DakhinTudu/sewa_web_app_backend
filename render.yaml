@@ -1,0 +1,20 @@
+# Render Blueprint — SEWA Backend (Docker) + Neon DB
+# See DEPLOY.md for full setup (Neon + env vars).
+#
+# Use "New > Blueprint" and connect this repo, then add env vars in the dashboard.
+
+services:
+  - type: web
+    name: sewa-backend
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      # Add in Render Dashboard (from Neon + secret):
+      # SPRING_DATASOURCE_URL=jdbc:postgresql://ep-xxx.neon.tech:5432/neondb?sslmode=require
+      # SPRING_DATASOURCE_USERNAME=...
+      # SPRING_DATASOURCE_PASSWORD=...
+      # SEWA_JWT_SECRET=<long random string>

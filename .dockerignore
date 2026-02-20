@@ -1,13 +1,28 @@
-
-.git/
-.idea/
-.vscode/
+# Git and IDE
+.git
+.gitignore
+.idea
+.vscode
 *.iml
-.mvn/
-mvnw
-mvnw.cmd
-docker-compose.yml
-.dockerignore
+*.ipr
+*.iws
+
+# Build output (we build inside Docker)
+target/
+
+# Frontend (backend only in this image)
 sewa-frontend/
-uploads/
-node_modules/
+
+# Docs and local scripts (not needed in image)
+*.md
+RUN.md
+BACKEND_COMPLETION.md
+COMPLETION_CHECKLIST.md
+IMPLEMENTATION_COMPLETE.md
+
+# Misc
+.DS_Store
+Thumbs.db
+*.log
+.env
+.env.*
