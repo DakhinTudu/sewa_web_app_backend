@@ -30,11 +30,9 @@ In the same screen (or later: **Site settings → Environment variables**):
 
 | Key | Value |
 |-----|--------|
-| `VITE_API_BASE_URL` | `https://YOUR-RENDER-APP.onrender.com/api/v1` |
+| `VITE_API_BASE_URL` | (optional) Override API URL; if unset, build uses the URL in `src/config/api.ts`. |
 
-Replace `YOUR-RENDER-APP` with your actual Render service name (e.g. `sewa-backend` → `https://sewa-backend.onrender.com/api/v1`).
-
-You can use `env.for-netlify.txt` as a template: set `VITE_API_BASE_URL` to your full Render API base URL including `/api/v1`.
+To change the backend URL, edit `sewa-frontend/src/config/api.ts` (comment one line, uncomment the other) and redeploy.
 
 ---
 
@@ -63,6 +61,6 @@ Both `netlify.toml` and `public/_redirects` tell Netlify to serve `index.html` f
 | Base directory | `sewa-frontend` |
 | Build command | `npm run build` |
 | Publish directory | `dist` |
-| Env var | `VITE_API_BASE_URL` = your Render URL + `/api/v1` |
+| API URL | Set in `src/config/api.ts` (or optional env `VITE_API_BASE_URL`) |
 
 Backend CORS is already set to allow any origin, so your Netlify URL will work with the Render API.

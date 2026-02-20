@@ -1,8 +1,7 @@
 import axios from 'axios';
+import { API_BASE_URL } from '../config/api';
 
-// Get API base URL from environment variable, default to localhost for development
-const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
-
+const baseURL = API_BASE_URL;
 console.log(`🔧 API Base URL: ${baseURL}`);
 
 // Create axios instance with base URL
