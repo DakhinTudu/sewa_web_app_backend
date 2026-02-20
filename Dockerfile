@@ -24,8 +24,8 @@ RUN JAR=$(find target -maxdepth 1 -name '*.jar' ! -name '*-sources.jar' -print -
 # ---- Runtime stage ----
 FROM eclipse-temurin:21-jre-alpine
 
-# Default port (Render sets PORT at runtime)
-ENV PORT=8080
+# Render sets PORT at runtime (e.g. 10000). Default 10000 so health check finds us if PORT is unset.
+ENV PORT=10000
 
 # Run as non-root for security
 RUN addgroup -g 1000 app && adduser -u 1000 -G app -D app
@@ -34,9 +34,9 @@ WORKDIR /app
 # Copy the built JAR from builder
 COPY --from=builder /build/app.jar ./app.jar
 
-# Render and most PaaS set PORT; Spring Boot reads server.port
 USER app
-EXPOSE 8080
+# Render expects the app to listen on $PORT
+EXPOSE 10000
 
-# Use PORT from environment so Render can bind correctly
-CMD ["sh", "-c", "exec java -Dserver.port=${PORT} -jar app.jar"]
+# Bind to PORT so Render detects the service; fallback 10000 if PORT not set
+CMD ["sh", "-c", "exec java -Dserver.port=${PORT:-10000} -Dserver.address=0.0.0.0 -jar app.jar"]

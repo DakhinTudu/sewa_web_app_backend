@@ -86,6 +86,8 @@ Then set:
 
 **Security:** If you ever pasted your Neon password in chat or in a file, rotate it in the Neon dashboard (Database → Reset password) and update `SPRING_DATASOURCE_PASSWORD` on Render.
 
+**Bulk paste:** The repo has `env.for-render.txt` with all keys (and placeholders for password and JWT). Fill in the two placeholders, then in Render → Environment use **“Add from .env”** or paste the lines as key/value. Do not commit the file after adding real secrets; for local use you can rename a copy to `.env` (`.env` is in `.gitignore`).
+
 **Generate a safe JWT secret (one option):**
 
 ```bash
@@ -113,6 +115,13 @@ curl https://<your-service-name>.onrender.com/api/v1/notices
 ```
 
 (or any public endpoint you have)
+
+---
+
+## Troubleshooting
+
+- **"No open ports detected" / deploy exits:** The app must listen on the port Render provides (`PORT` env var, often 10000). The Dockerfile and `application-prod.properties` are set so the app binds to `0.0.0.0:${PORT}`. If you still see this, confirm in Render that no build or run override is changing the port.
+- **App exits during "HikariPool-1 - Starting...":** Usually a DB connection problem. Check Neon credentials (`SPRING_DATASOURCE_URL`, `USERNAME`, `PASSWORD`), that the URL includes `?sslmode=require`, and that Neon project is not paused. Connection timeouts are set to 30s in prod so Neon cold start can complete.
 
 ---
 
