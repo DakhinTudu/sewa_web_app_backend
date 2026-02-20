@@ -1,10 +1,9 @@
-# Netlify config at repo root so the build uses the frontend subfolder.
+# Netlify config at repo root. Build and publish from sewa-frontend (UI may override base).
 # https://docs.netlify.com/configure-builds/file-based-configuration/
 
 [build]
-  base     = "sewa-frontend"
-  command  = "npm run build"
-  publish  = "dist"
+  command  = "cd sewa-frontend && npm run build"
+  publish  = "sewa-frontend/dist"
 
 # SPA: serve index.html for all routes (React Router)
 [[redirects]]
