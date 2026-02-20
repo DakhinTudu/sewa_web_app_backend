@@ -6,11 +6,12 @@
   publish   = "dist"
   base      = "/"
 
-# SPA: all routes serve index.html (React Router)
+# SPA: always serve index.html so React Router handles routes (fixes "Page not found" on refresh/direct links)
 [[redirects]]
   from    = "/*"
   to      = "/index.html"
   status  = 200
+  force   = true
 
 # Optional: security headers
 [[headers]]
