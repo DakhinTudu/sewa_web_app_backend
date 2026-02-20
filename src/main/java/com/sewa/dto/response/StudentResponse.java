@@ -17,6 +17,7 @@ public class StudentResponse {
     private String institute;
     private String course;
     private String phone;
+    private String educationalLevel;
     private MembershipStatus status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

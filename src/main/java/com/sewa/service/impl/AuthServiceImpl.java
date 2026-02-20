@@ -69,18 +69,18 @@ public class AuthServiceImpl implements AuthService {
                 .roles(Collections.singleton(role))
                 .build();
 
-        user = userRepository.save(user);
+        User savedUser = userRepository.save(user);
 
         if ("MEMBER".equalsIgnoreCase(request.getMemberType())) {
             Member member = Member.builder()
-                    .user(user)
+                    .user(savedUser)
                     .fullName(request.getFullName())
                     .membershipStatus(MembershipStatus.PENDING)
                     .build();
             memberRepository.save(member);
         } else if ("STUDENT".equalsIgnoreCase(request.getMemberType())) {
             Student student = Student.builder()
-                    .user(user)
+                    .user(savedUser)
                     .fullName(request.getFullName())
                     .status(MembershipStatus.PENDING)
                     .build();

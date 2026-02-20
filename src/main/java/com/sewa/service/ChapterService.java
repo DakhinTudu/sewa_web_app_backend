@@ -22,4 +22,6 @@ public interface ChapterService {
     void updateMemberRole(Integer chapterId, Integer memberId, String role);
 
     void removeMember(Integer chapterId, Integer memberId);
+
+    void deleteChapter(Integer id);
 }

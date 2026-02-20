@@ -1,21 +1,21 @@
 import { Card, CardContent } from '../../components/ui/Card';
-import { MapPinIcon, UserIcon } from '@heroicons/react/24/outline';
+import { MapPinIcon } from '@heroicons/react/24/outline';
 import { useQuery } from '@tanstack/react-query';
 import { chaptersApi } from '../../api/chapters.api';
 import { representativesApi } from '../../api/representatives.api';
+import type { ChapterResponse } from '../../types/api.types';
+import { PLACEHOLDER_CHAPTER, PLACEHOLDER_AVATAR } from '../../constants/placeholders';
 
 export default function OrganizationPage() {
-    const { data: chaptersPage, isLoading: chaptersLoading } = useQuery({
+    const { data: chapters = [], isLoading: chaptersLoading } = useQuery({
         queryKey: ['chapters'],
-        queryFn: () => chaptersApi.getAllChapters(0, 50)
+        queryFn: () => chaptersApi.getAllChapters(),
     });
 
     const { data: representatives, isLoading: repsLoading } = useQuery({
         queryKey: ['representatives', 'active'],
-        queryFn: () => representativesApi.getActive()
+        queryFn: () => representativesApi.getActive(),
     });
-
-    const chapters = chaptersPage?.content || [];
 
     return (
         <div className="bg-white">
@@ -48,18 +48,24 @@ export default function OrganizationPage() {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                        {chapters.map((chapter) => (
-                            <Card key={chapter.id} className="hover:shadow-md transition-all hover:-translate-y-1">
+                        {chapters.map((chapter: ChapterResponse) => (
+                            <Card key={chapter.id} className="overflow-hidden hover:shadow-md transition-all hover:-translate-y-1">
+                                <div className="aspect-video w-full overflow-hidden bg-gray-100">
+                                    <img
+                                        src={PLACEHOLDER_CHAPTER}
+                                        alt=""
+                                        className="h-full w-full object-cover"
+                                        loading="lazy"
+                                    />
+                                </div>
                                 <CardContent className="p-6">
-                                    <div className="flex items-start">
-                                        <div className="flex-shrink-0">
-                                            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-100">
-                                                <MapPinIcon className="h-6 w-6 text-primary-600" />
-                                            </div>
+                                    <div className="flex items-start gap-3">
+                                        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-primary-100">
+                                            <MapPinIcon className="h-5 w-5 text-primary-600" />
                                         </div>
-                                        <div className="ml-4 flex-1">
+                                        <div className="min-w-0 flex-1">
                                             <h3 className="text-lg font-semibold text-gray-900">{chapter.chapterName}</h3>
-                                            <div className="mt-3 space-y-2 text-sm text-gray-600">
+                                            <div className="mt-2 space-y-1 text-sm text-gray-600">
                                                 <p className="flex items-center gap-1.5">
                                                     <span className="font-medium">Type:</span>
                                                     <span className="px-2 py-0.5 rounded-full bg-secondary-100 text-secondary-700 text-xs font-semibold">
@@ -93,21 +99,31 @@ export default function OrganizationPage() {
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                            {(representatives || []).map((rep) => (
-                                <Card key={rep.id} className="text-center hover:shadow-lg transition-all hover:-translate-y-1">
-                                    <CardContent className="p-6">
-                                        <div className="mx-auto h-20 w-20 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center mb-4 shadow-md">
-                                            <UserIcon className="h-10 w-10 text-white" />
-                                        </div>
-                                        <h3 className="text-lg font-semibold text-gray-900">{rep.member.fullName}</h3>
-                                        <p className="text-sm text-primary-600 font-bold mt-1 uppercase tracking-wider">{rep.roleName}</p>
-                                        <p className="text-xs text-gray-500 mt-2">{rep.member.address || 'Member'}</p>
-                                        <div className="mt-4 pt-4 border-t border-gray-100 text-[10px] text-gray-400 font-medium">
-                                            TERM: {new Date(rep.termStart).getFullYear()} - {new Date(rep.termEnd).getFullYear()}
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            ))}
+                            {(representatives || []).map((rep) => {
+                                const member = typeof rep.member === 'object' && rep.member ? rep.member as { fullName?: string; address?: string } : null;
+                                const fullName = member?.fullName ?? 'Member';
+                                const address = member?.address ?? '';
+                                return (
+                                    <Card key={rep.id} className="text-center overflow-hidden hover:shadow-lg transition-all hover:-translate-y-1">
+                                        <CardContent className="p-6">
+                                            <div className="mx-auto h-24 w-24 rounded-full overflow-hidden bg-gray-100 mb-4 shadow-md ring-2 ring-white">
+                                                <img
+                                                    src={PLACEHOLDER_AVATAR}
+                                                    alt=""
+                                                    className="h-full w-full object-cover"
+                                                    loading="lazy"
+                                                />
+                                            </div>
+                                            <h3 className="text-lg font-semibold text-gray-900">{fullName}</h3>
+                                            <p className="text-sm text-primary-600 font-bold mt-1 uppercase tracking-wider">{rep.roleName}</p>
+                                            {address && <p className="text-xs text-gray-500 mt-2 line-clamp-2">{address}</p>}
+                                            <div className="mt-4 pt-4 border-t border-gray-100 text-[10px] text-gray-400 font-medium">
+                                                TERM: {new Date(rep.termStart).getFullYear()} – {new Date(rep.termEnd).getFullYear()}
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                );
+                            })}
                         </div>
                     )}
                 </div>

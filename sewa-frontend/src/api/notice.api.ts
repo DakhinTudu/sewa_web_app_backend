@@ -3,8 +3,9 @@ import type { ApiResponse, NoticeResponse } from '../types/api.types';
 
 export interface NoticeRequest {
     title: string;
-    description?: string;
-    published?: boolean;
+    content: string;
+    expiresAt?: string;
+    active?: boolean;
 }
 
 export const noticeApi = {

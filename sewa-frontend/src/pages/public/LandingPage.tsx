@@ -3,6 +3,7 @@ import { ArrowRightIcon, UserGroupIcon, CalendarIcon, DocumentTextIcon, MapPinIc
 import { Button } from '../../components/ui/Button';
 import { useQuery } from '@tanstack/react-query';
 import { noticeApi } from '../../api/notice.api';
+import { PLACEHOLDER_NEWS } from '../../constants/placeholders';
 
 export default function LandingPage() {
     const { data: notices, isLoading: noticesLoading } = useQuery({
@@ -13,7 +14,7 @@ export default function LandingPage() {
     const displayNotices = (notices && notices.length > 0)
         ? notices.slice(0, 3).map(n => ({
             title: n.title,
-            description: n.description || 'New announcement from SEWA.',
+            description: n.content?.slice(0, 120) || 'New announcement from SEWA.',
             date: new Date(n.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }),
             link: '/notices'
         }))
@@ -131,18 +132,22 @@ export default function LandingPage() {
                 ) : (
                     <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
                         {displayNotices.map((news, idx) => (
-                            <div key={idx} className="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-lg ring-1 ring-gray-900/5 transition-all hover:shadow-2xl hover:-translate-y-1">
-                                <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${idx % 3 === 0 ? 'from-primary-500 to-primary-600' : idx % 3 === 1 ? 'from-teal-500 to-teal-600' : 'from-amber-500 to-amber-600'}`} />
-                                <div className="flex items-center gap-2 text-sm text-gray-500 mb-3 mt-2">
-                                    <CalendarIcon className="h-4 w-4" />
-                                    {news.date}
+                            <div key={idx} className="group relative overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-gray-900/5 transition-all hover:shadow-2xl hover:-translate-y-1">
+                                <div className="aspect-[16/9] w-full overflow-hidden bg-gray-100">
+                                    <img src={PLACEHOLDER_NEWS} alt="" className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
                                 </div>
-                                <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-primary-600 transition-colors line-clamp-2">{news.title}</h3>
-                                <p className="text-sm text-gray-600 mb-4 leading-relaxed line-clamp-3">{news.description}</p>
-                                <Link to={news.link} className="inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-700 group-hover:gap-2 transition-all">
-                                    Read more
-                                    <ArrowRightIcon className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                                </Link>
+                                <div className="p-6">
+                                    <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
+                                        <CalendarIcon className="h-4 w-4 flex-shrink-0" />
+                                        {news.date}
+                                    </div>
+                                    <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-primary-600 transition-colors line-clamp-2">{news.title}</h3>
+                                    <p className="text-sm text-gray-600 mb-4 leading-relaxed line-clamp-3">{news.description}</p>
+                                    <Link to={news.link} className="inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-700 group-hover:gap-2 transition-all min-h-[44px] items-center">
+                                        Read more
+                                        <ArrowRightIcon className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                                    </Link>
+                                </div>
                             </div>
                         ))}
                     </div>

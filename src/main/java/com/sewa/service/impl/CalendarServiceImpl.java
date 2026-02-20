@@ -26,21 +26,33 @@ public class CalendarServiceImpl implements CalendarService {
 
     @Override
     public SewaCalendar getEventById(Integer id) {
-        return null;
+        return calendarRepository.findById(id)
+                .orElseThrow(() -> new com.sewa.exception.SewaException("Event not found"));
     }
 
     @Override
     public SewaCalendar createEvent(SewaCalendar event) {
+        event.setCreatedAt(java.time.LocalDateTime.now());
         return calendarRepository.save(event);
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public SewaCalendar updateEvent(Integer id, SewaCalendar event) {
-        return null;
+        SewaCalendar existing = getEventById(id);
+        existing.setTitle(event.getTitle());
+        existing.setDescription(event.getDescription());
+        existing.setEventDate(event.getEventDate());
+        existing.setEventType(event.getEventType());
+        existing.setVisibility(event.getVisibility());
+        existing.setChapter(event.getChapter());
+        return calendarRepository.save(existing);
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public void deleteEvent(Integer id) {
-
+        SewaCalendar existing = getEventById(id);
+        calendarRepository.delete(existing);
     }
 }

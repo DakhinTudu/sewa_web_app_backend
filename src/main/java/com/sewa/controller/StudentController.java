@@ -1,13 +1,13 @@
 package com.sewa.controller;
 
 import com.sewa.common.dto.ApiResponse;
+import com.sewa.common.dto.PageDto;
 import com.sewa.common.util.ApiResponseBuilder;
 import com.sewa.dto.response.StudentResponse;
 import com.sewa.service.StudentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -40,17 +40,17 @@ public class StudentController {
     @GetMapping
     @PreAuthorize("hasAuthority('STUDENT_LIST')")
     @Operation(summary = "Get all students", description = "Fetch a paginated list of all students")
-    public ResponseEntity<ApiResponse<Page<StudentResponse>>> getAllStudents(Pageable pageable) {
-        Page<StudentResponse> students = studentService.getAllStudents(pageable);
-        return ResponseEntity.ok(ApiResponseBuilder.success(students, "Students list fetched"));
+    public ResponseEntity<ApiResponse<PageDto<StudentResponse>>> getAllStudents(Pageable pageable) {
+        return ResponseEntity.ok(ApiResponseBuilder.success(
+                PageDto.from(studentService.getAllStudents(pageable)), "Students list fetched"));
     }
 
     @GetMapping("/pending")
     @PreAuthorize("hasAuthority('STUDENT_LIST')")
     @Operation(summary = "Get pending students")
-    public ResponseEntity<ApiResponse<Page<StudentResponse>>> getPendingStudents(Pageable pageable) {
-        Page<StudentResponse> students = studentService.getPendingStudents(pageable);
-        return ResponseEntity.ok(ApiResponseBuilder.success(students, "Pending students fetched"));
+    public ResponseEntity<ApiResponse<PageDto<StudentResponse>>> getPendingStudents(Pageable pageable) {
+        return ResponseEntity.ok(ApiResponseBuilder.success(
+                PageDto.from(studentService.getPendingStudents(pageable)), "Pending students fetched"));
     }
 
     @PatchMapping("/{id}/approve")

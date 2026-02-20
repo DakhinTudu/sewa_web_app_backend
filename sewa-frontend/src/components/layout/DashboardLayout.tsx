@@ -1,5 +1,5 @@
 import { Fragment, useState } from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { Dialog, Transition } from '@headlessui/react';
 import {
     Bars3Icon,
@@ -13,8 +13,11 @@ import {
     ChatBubbleLeftRightIcon,
     CurrencyRupeeIcon,
     Cog6ToothIcon,
+    ArrowRightOnRectangleIcon,
 } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
+import { useAuth } from '../../auth/AuthProvider';
+import { Logo } from '../Logo';
 
 const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
@@ -32,6 +35,13 @@ const navigation = [
 export default function DashboardLayout() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const location = useLocation();
+    const navigate = useNavigate();
+    const { user, logout } = useAuth();
+
+    const handleLogout = () => {
+        logout();
+        navigate('/');
+    };
 
     return (
         <>
@@ -80,8 +90,9 @@ export default function DashboardLayout() {
 
                                     {/* Mobile Sidebar Component */}
                                     <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-4">
-                                        <div className="flex h-16 shrink-0 items-center">
-                                            <span className="text-2xl font-bold text-primary-600">SEWA Portal</span>
+                                        <div className="flex h-16 shrink-0 items-center gap-2">
+                                            <Logo variant="full" linkTo="/dashboard" className="h-9 w-9" />
+                                            <span className="text-lg font-bold text-primary-600">Portal</span>
                                         </div>
                                         <nav className="flex flex-1 flex-col">
                                             <ul role="list" className="flex flex-1 flex-col gap-y-7">
@@ -91,6 +102,7 @@ export default function DashboardLayout() {
                                                             <li key={item.name}>
                                                                 <Link
                                                                     to={item.href}
+                                                                    onClick={() => setSidebarOpen(false)}
                                                                     className={clsx(
                                                                         location.pathname === item.href
                                                                             ? 'bg-gray-50 text-primary-600'
@@ -123,8 +135,9 @@ export default function DashboardLayout() {
                 {/* Static sidebar for desktop */}
                 <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
                     <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6 pb-4">
-                        <div className="flex h-16 shrink-0 items-center">
-                            <span className="text-2xl font-bold text-primary-600 tracking-tight">SEWA Portal</span>
+                        <div className="flex h-16 shrink-0 items-center gap-2">
+                            <Logo variant="full" linkTo="/dashboard" className="h-9 w-9" />
+                            <span className="text-lg font-bold text-primary-600 tracking-tight">Portal</span>
                         </div>
                         <nav className="flex flex-1 flex-col">
                             <ul role="list" className="flex flex-1 flex-col gap-y-7">
@@ -154,14 +167,21 @@ export default function DashboardLayout() {
                                         ))}
                                     </ul>
                                 </li>
-                                <li className="mt-auto">
-                                    <div className="text-xs font-semibold leading-6 text-gray-400">Your Profile</div>
-                                    <div className="mt-2 flex items-center gap-x-4 px-2 py-3 text-sm font-semibold leading-6 text-gray-900 hover:bg-gray-50 rounded-md cursor-pointer">
-                                        <div className='h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-600'>
-                                            <UserIcon className='h-5 w-5' />
+                                <li className="mt-auto pt-4 border-t border-gray-200">
+                                    <div className="flex items-center gap-x-3 px-2 py-3 text-sm font-semibold leading-6 text-gray-900">
+                                        <div className="h-9 w-9 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 flex-shrink-0">
+                                            <UserIcon className="h-5 w-5" />
                                         </div>
-                                        <span aria-hidden="true">User Name</span>
+                                        <span className="truncate">{user?.username ?? 'User'}</span>
                                     </div>
+                                    <button
+                                        type="button"
+                                        onClick={handleLogout}
+                                        className="flex w-full items-center gap-x-3 rounded-md px-2 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-primary-600 min-h-[44px]"
+                                    >
+                                        <ArrowRightOnRectangleIcon className="h-5 w-5 flex-shrink-0" />
+                                        Logout
+                                    </button>
                                 </li>
                             </ul>
                         </nav>
@@ -183,11 +203,20 @@ export default function DashboardLayout() {
                         <div className="h-6 w-px bg-gray-200 lg:hidden" aria-hidden="true" />
 
                         <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6 justify-end items-center">
-                            {/* Add search or notifications here */}
-                            <div className="flex items-center gap-x-4 lg:gap-x-6">
-                                <div className="text-sm font-semibold leading-6 text-gray-900">
-                                    Santal Engineers Welfare Association
-                                </div>
+                            <div className="hidden sm:block text-sm font-semibold leading-6 text-gray-900 truncate">
+                                SEWA Dashboard
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm text-gray-600 truncate max-w-[120px] sm:max-w-[180px]">{user?.username}</span>
+                                <button
+                                    type="button"
+                                    onClick={handleLogout}
+                                    className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-primary-600 min-h-[44px] sm:min-h-0"
+                                    title="Logout"
+                                >
+                                    <ArrowRightOnRectangleIcon className="h-5 w-5" />
+                                    <span className="hidden sm:inline">Logout</span>
+                                </button>
                             </div>
                         </div>
                     </div>

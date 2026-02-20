@@ -10,4 +10,6 @@ import java.util.Optional;
 @Repository
 public interface ChapterMemberRepository extends JpaRepository<ChapterMember, ChapterMemberId> {
     Optional<ChapterMember> findByChapterIdAndMemberId(Integer chapterId, Integer memberId);
+
+    java.util.List<ChapterMember> findAllByChapterId(Integer chapterId);
 }

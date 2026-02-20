@@ -64,15 +64,23 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="w-full">
-            <h2 className="text-center text-2xl font-bold tracking-tight text-secondary-900">
-                Sign in to SEWA
-            </h2>
-            <p className="mt-2 text-center text-sm text-secondary-600">
-                Access your member portal
-            </p>
+        <div className="min-h-[80vh] flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gradient-to-br from-primary-50 via-secondary-50 to-teal-50">
+            <div className="sm:mx-auto sm:w-full sm:max-w-md px-4">
+                <div className="flex justify-center gap-2 mb-8">
+                    <div className="h-12 w-12 rounded-full bg-primary-900 flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                        S
+                    </div>
+                    <span className="self-center text-xl font-bold text-primary-900">SEWA</span>
+                </div>
 
-            <div className="mt-8 bg-white py-8 px-6 shadow-xl rounded-2xl border border-secondary-200 ring-1 ring-secondary-900/5">
+                <h2 className="text-center text-2xl font-bold tracking-tight text-secondary-900">
+                    Sign in to SEWA
+                </h2>
+                <p className="mt-2 text-center text-sm text-secondary-600">
+                    Access your member portal
+                </p>
+
+                <div className="mt-8 bg-white py-8 px-6 shadow-xl rounded-2xl border border-secondary-200 ring-1 ring-secondary-900/5">
                     <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
                         {loginError && (
                             <div className="rounded-md bg-red-50 p-4 border border-red-200">
@@ -119,6 +127,7 @@ export default function LoginPage() {
                         </Link>
                     </p>
                 </div>
+            </div>
         </div>
     );
 }

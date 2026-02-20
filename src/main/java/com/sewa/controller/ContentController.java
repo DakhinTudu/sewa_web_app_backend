@@ -24,7 +24,6 @@ public class ContentController {
     private final ContentService contentService;
 
     @GetMapping
-    @PreAuthorize("hasAuthority('CONTENT_VIEW')")
     @Operation(summary = "Get all content", description = "Fetch a paginated list of portal content")
     public ResponseEntity<ApiResponse<Page<ContentResponse>>> getAllContent(Pageable pageable) {
         Page<ContentResponse> content = contentService.getAllContent(pageable);
@@ -40,7 +39,6 @@ public class ContentController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('CONTENT_VIEW')")
     @Operation(summary = "Get content by ID")
     public ResponseEntity<ApiResponse<ContentResponse>> getContentById(@PathVariable Integer id) {
         ContentResponse content = contentService.getContentById(id);

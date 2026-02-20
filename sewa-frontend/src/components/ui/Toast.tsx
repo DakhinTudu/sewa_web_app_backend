@@ -112,23 +112,24 @@ function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
         >
-            <div className={`pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg shadow-lg border ${colors[toast.type]}`}>
+            <div className={`pointer-events-auto w-full max-w-sm overflow-hidden rounded-xl shadow-xl border bg-white ${colors[toast.type]} ring-1 ring-black ring-opacity-5`}>
                 <div className="p-4">
-                    <div className="flex items-start">
-                        <div className="flex-shrink-0">
-                            <Icon className={`h-6 w-6 ${iconColors[toast.type]}`} aria-hidden="true" />
+                    <div className="flex items-start gap-3">
+                        <div className="flex-shrink-0 pt-0.5">
+                            <Icon className={`h-5 w-5 ${iconColors[toast.type]}`} aria-hidden="true" />
                         </div>
-                        <div className="ml-3 w-0 flex-1 pt-0.5">
-                            <p className="text-sm font-medium">{toast.message}</p>
+                        <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-secondary-900">{toast.type.charAt(0).toUpperCase() + toast.type.slice(1)}</p>
+                            <p className="mt-1 text-sm text-secondary-600 line-clamp-3">{toast.message}</p>
                         </div>
-                        <div className="ml-4 flex flex-shrink-0">
+                        <div className="flex-shrink-0 flex">
                             <button
                                 type="button"
-                                className="inline-flex rounded-md hover:opacity-75 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                className="inline-flex rounded-lg p-1.5 text-secondary-400 hover:bg-secondary-100 hover:text-secondary-500 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
                                 onClick={onClose}
                             >
                                 <span className="sr-only">Close</span>
-                                <XMarkIcon className="h-5 w-5" aria-hidden="true" />
+                                <XMarkIcon className="h-4 w-4" aria-hidden="true" />
                             </button>
                         </div>
                     </div>

@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './auth/AuthProvider';
 import PublicLayout from './components/layout/PublicLayout';
-import AuthLayout from './components/layout/AuthLayout';
 import DashboardLayout from './components/layout/DashboardLayout';
 import ProtectedRoute from './auth/ProtectedRoute';
 
@@ -39,10 +38,6 @@ function App() {
                         <Route path="/organization" element={<OrganizationPage />} />
                         <Route path="/contact" element={<ContactPage />} />
                         <Route path="/notices" element={<NoticesPage />} />
-                    </Route>
-
-                    {/* Auth pages (centered, no Navbar) */}
-                    <Route element={<AuthLayout />}>
                         <Route path="/login" element={<LoginPage />} />
                         <Route path="/register" element={<RegisterPage />} />
                     </Route>

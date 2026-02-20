@@ -26,7 +26,7 @@ export function Table<T>({ data, columns, keyExtractor, isLoading }: TableProps<
     }
 
     return (
-        <div className="overflow-x-auto ring-1 ring-gray-200 sm:rounded-lg">
+        <div className="overflow-x-auto ring-1 ring-gray-200 sm:rounded-lg" style={{ minHeight: '2rem' }}>
             <table className="min-w-full divide-y divide-gray-300">
                 <thead className="bg-gray-50">
                     <tr>
@@ -35,7 +35,7 @@ export function Table<T>({ data, columns, keyExtractor, isLoading }: TableProps<
                                 key={index}
                                 scope="col"
                                 className={clsx(
-                                    "px-3 py-3.5 text-left text-sm font-semibold text-gray-900",
+                                    "px-3 py-3 sm:py-3.5 text-left text-xs sm:text-sm font-semibold text-gray-900",
                                     col.className
                                 )}
                             >
@@ -47,18 +47,18 @@ export function Table<T>({ data, columns, keyExtractor, isLoading }: TableProps<
                 <tbody className="divide-y divide-gray-200 bg-white">
                     {data.length === 0 ? (
                         <tr>
-                            <td colSpan={columns.length} className="px-3 py-4 text-sm text-center text-gray-500">
+                            <td colSpan={columns.length} className="px-4 py-6 text-sm text-center text-gray-500">
                                 No data available.
                             </td>
                         </tr>
                     ) : (
                         data.map((row) => (
-                            <tr key={keyExtractor(row)}>
+                            <tr key={keyExtractor(row)} className="hover:bg-gray-50/50">
                                 {columns.map((col, index) => (
                                     <td
                                         key={index}
                                         className={clsx(
-                                            "whitespace-nowrap px-3 py-4 text-sm text-gray-500",
+                                            "px-3 py-3 sm:py-4 text-sm text-gray-500",
                                             col.className
                                         )}
                                     >

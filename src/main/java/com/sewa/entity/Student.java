@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode(callSuper = true)
+@org.hibernate.annotations.DynamicUpdate
 public class Student extends BaseEntity {
 
     @Id
@@ -31,8 +32,17 @@ public class Student extends BaseEntity {
     @Column(name = "membership_code", unique = true)
     private String membershipCode;
 
+    @ManyToOne
+    @JoinColumn(name = "chapter_id")
+    private Chapter chapter;
+
     private String institute;
     private String course;
+
+    @ManyToOne
+    @JoinColumn(name = "educational_level_id")
+    private EducationalLevelMaster educationalLevel;
+
     private String phone;
 
     @Enumerated(EnumType.STRING)

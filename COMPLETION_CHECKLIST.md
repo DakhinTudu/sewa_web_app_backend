@@ -292,6 +292,20 @@
 - [x] Active route highlighting
 - [x] Mobile-responsive nav
 
+### 6. Notices API (aligned with backend)
+- [x] NoticesPage uses `noticeApi.getAll()` (dedicated `/api/v1/notices` endpoint)
+- [x] NoticeResponse type: content, active, expiresAt (matches backend)
+- [x] LandingPage uses notice.content for preview text
+
+### 7. Admin page (full implementation)
+- [x] Settings: Edit value per row → modal + `settingsApi.update(key, { value })`
+- [x] Representatives: "Add representative" → modal with member, roleName, termStart, termEnd + `representativesApi.create()`
+
+### 8. Backend completion (see BACKEND_COMPLETION.md)
+- [x] ChapterController: GET /chapters/{id}, DELETE /chapters/{id} (soft-delete)
+- [x] MemberController: getPendingMembers returns only PENDING status
+- [x] Fee API: FeeRequest supports membershipCode, financialYear, receiptNumber, remarks; FeeResponse includes paymentDate, paymentStatus, financialYear, receiptNumber for PaymentsPage
+
 ---
 
 ## 🧪 Testing Readiness

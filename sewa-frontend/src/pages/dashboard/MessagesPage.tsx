@@ -86,7 +86,7 @@ export default function MessagesPage() {
                 </CardContent>
             </Card>
 
-            <Modal open={composeOpen} onClose={() => setComposeOpen(false)} title="Compose message">
+            <Modal isOpen={composeOpen} onClose={() => setComposeOpen(false)} title="Compose message">
                 <div className="space-y-4">
                     <Input label="To (username)" value={recipient} onChange={(e) => setRecipient(e.target.value)} placeholder="username" />
                     <Input label="Subject" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Subject" />

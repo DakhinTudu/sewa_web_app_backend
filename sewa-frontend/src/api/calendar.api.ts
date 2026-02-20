@@ -11,4 +11,18 @@ export const calendarApi = {
         const response = await api.get<ApiResponse<CalendarEventResponse[]>>(`/calendar/chapter/${chapterId}`);
         return response.data.data;
     },
+
+    createEvent: async (data: Partial<CalendarEventResponse>): Promise<CalendarEventResponse> => {
+        const response = await api.post<ApiResponse<CalendarEventResponse>>('/calendar', data);
+        return response.data.data;
+    },
+
+    updateEvent: async (id: number, data: Partial<CalendarEventResponse>): Promise<CalendarEventResponse> => {
+        const response = await api.put<ApiResponse<CalendarEventResponse>>(`/calendar/${id}`, data);
+        return response.data.data;
+    },
+
+    deleteEvent: async (id: number): Promise<void> => {
+        await api.delete<ApiResponse<void>>(`/calendar/${id}`);
+    },
 };

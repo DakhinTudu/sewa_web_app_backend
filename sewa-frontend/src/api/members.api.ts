@@ -12,9 +12,19 @@ export const membersApi = {
         return response.data.data;
     },
 
-    getAllMembers: async (page = 0, size = 10): Promise<Page<MemberResponse>> => {
+    getAllMembers: async (
+        page = 0,
+        size = 10,
+        filters?: {
+            query?: string;
+            chapterId?: number;
+            educationalLevel?: string;
+            workingSector?: string;
+            status?: string;
+        }
+    ): Promise<Page<MemberResponse>> => {
         const response = await api.get<ApiResponse<Page<MemberResponse>>>('/members', {
-            params: { page, size },
+            params: { page, size, ...filters },
         });
         return response.data.data;
     },

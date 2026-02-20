@@ -1,38 +1,37 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import { cn } from '../../utils/cn';
 import { Button } from '../ui/Button';
 import { useAuth } from '../../auth/AuthProvider';
+import { Logo } from '../Logo';
 
 const navigation = [
     { name: 'Home', href: '/' },
     { name: 'About', href: '/about' },
     { name: 'Organization', href: '/organization' },
+    { name: 'Notices', href: '/notices' },
     { name: 'Contact', href: '/contact' },
 ];
 
 export default function Navbar() {
     const location = useLocation();
+    const navigate = useNavigate();
     const { user, isAuthenticated, logout, isLoading } = useAuth();
+
+    const handleLogout = () => {
+        logout();
+        navigate('/');
+    };
 
     return (
         <Disclosure as="nav" className="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-100">
-            {({ open }) => (
+            {({ open, close }) => (
                 <>
                     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                        <div className="flex h-20 justify-between">
-                            <div className="flex">
-                                <div className="flex flex-shrink-0 items-center gap-3">
-                                    {/* Placeholder Logo */}
-                                    <div className="h-10 w-10 bg-primary-900 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                                        S
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <span className="text-xl font-bold text-primary-900 tracking-tight leading-none">SEWA</span>
-                                        <span className="text-[10px] text-gray-500 font-medium tracking-wide uppercase hidden sm:block">Santal Engineers Welfare Association</span>
-                                    </div>
-                                </div>
+                        <div className="flex h-14 min-h-[3.5rem] sm:h-16 justify-between items-center">
+                            <div className="flex items-center min-w-0">
+                                <Logo variant="full" />
                                 <div className="hidden lg:ml-10 lg:flex lg:space-x-8 items-center">
                                     {navigation.map((item) => (
                                         <Link
@@ -51,10 +50,12 @@ export default function Navbar() {
                                 </div>
                             </div>
                             <div className="hidden lg:ml-6 lg:flex lg:items-center space-x-4">
-                                {!isLoading && isAuthenticated && user && location.pathname.startsWith('/dashboard') ? (
+                                {!isLoading && isAuthenticated && user ? (
                                     <div className="flex items-center gap-3">
-                                        <span className="text-sm text-secondary-700">{user.username}</span>
-                                        <Button variant="ghost" size="sm" onClick={() => logout()}>Logout</Button>
+                                        <Link to="/dashboard">
+                                            <span className="text-sm text-secondary-700 hover:text-primary-600">{user.username}</span>
+                                        </Link>
+                                        <Button variant="outline" size="sm" onClick={handleLogout}>Logout</Button>
                                     </div>
                                 ) : (
                                     <>
@@ -68,7 +69,7 @@ export default function Navbar() {
                                 )}
                             </div>
                             <div className="-mr-2 flex items-center lg:hidden">
-                                <DisclosureButton className="relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500">
+                                <DisclosureButton className="relative inline-flex items-center justify-center rounded-md p-3 min-h-[44px] min-w-[44px] text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500 touch-manipulation">
                                     <span className="absolute -inset-0.5" />
                                     <span className="sr-only">Open main menu</span>
                                     {open ? (
@@ -100,19 +101,20 @@ export default function Navbar() {
                             ))}
                             <div className="border-t border-gray-200 pt-4 pb-3">
                                 <div className="space-y-1 px-4 flex flex-col gap-2">
-                                    {!isLoading && isAuthenticated && user && location.pathname.startsWith('/dashboard') ? (
+                                    {!isLoading && isAuthenticated && user ? (
                                         <>
-                                            <div className="px-2 py-2 text-sm text-secondary-700">{user.username}</div>
-                                            <Button variant="outline" className="w-full justify-center" onClick={() => logout()}>Logout</Button>
+                                            <DisclosureButton as={Link} to="/dashboard" className="px-2 py-2 text-sm text-secondary-700 font-medium block">Dashboard</DisclosureButton>
+                                            <div className="px-2 py-1 text-sm text-gray-500">{user.username}</div>
+                                            <Button variant="outline" className="w-full justify-center min-h-[44px]" onClick={() => { handleLogout(); close(); }}>Logout</Button>
                                         </>
                                     ) : (
                                         <>
-                                            <Link to="/login" className="w-full">
-                                                <Button variant="outline" className="w-full justify-center">Log in</Button>
-                                            </Link>
-                                            <Link to="/register" className="w-full">
-                                                <Button className="w-full justify-center">Register</Button>
-                                            </Link>
+                                            <DisclosureButton as={Link} to="/login" className="w-full">
+                                                <Button variant="outline" className="w-full justify-center min-h-[44px]">Log in</Button>
+                                            </DisclosureButton>
+                                            <DisclosureButton as={Link} to="/register" className="w-full">
+                                                <Button className="w-full justify-center min-h-[44px]">Register</Button>
+                                            </DisclosureButton>
                                         </>
                                     )}
                                 </div>

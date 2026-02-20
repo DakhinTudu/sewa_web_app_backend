@@ -36,6 +36,9 @@ public class DataLoader implements CommandLineRunner {
     private final InternalMessageRepository internalMessageRepository;
     private final SystemSettingRepository systemSettingRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EducationalLevelRepository educationalLevelRepository;
+    private final WorkingSectorRepository workingSectorRepository;
+    private final GenderRepository genderRepository;
 
     @Override
     @Transactional
@@ -44,6 +47,7 @@ public class DataLoader implements CommandLineRunner {
         initializePermissions();
         initializeRoles();
         initializeAdmin();
+        initializeMasters();
         initializeChapters();
         initializeMembersAndStudents();
         initializeElectedRepresentatives();
@@ -51,7 +55,7 @@ public class DataLoader implements CommandLineRunner {
         initializeNotices();
         initializeCalendarEvents();
         initializeMembershipFees();
-        // initializeMessages(); // Disabled due to database check constraint issues
+        initializeMessages();
         initializeSystemSettings();
         log.info("Data initialization completed successfully!");
     }
@@ -85,55 +89,65 @@ public class DataLoader implements CommandLineRunner {
     }
 
     private void initializeRoles() {
-        if (roleRepository.count() == 0) {
-            Map<String, List<String>> roleMappings = new HashMap<>();
+        Map<String, List<String>> roleMappings = new HashMap<>();
 
-            // SUPER_ADMIN mapping - has all permissions
-            roleMappings.put("ROLE_SUPER_ADMIN", permissionRepository.findAll().stream()
-                    .map(Permission::getPermissionCode).collect(Collectors.toList()));
+        // SUPER_ADMIN mapping - has all permissions
+        roleMappings.put("ROLE_SUPER_ADMIN", permissionRepository.findAll().stream()
+                .map(Permission::getPermissionCode).collect(Collectors.toList()));
 
-            // ADMIN mapping
-            roleMappings.put("ROLE_ADMIN", Arrays.asList(
-                    "MEMBER_CREATE", "MEMBER_VIEW", "MEMBER_UPDATE", "MEMBER_APPROVE", "MEMBER_REJECT", "MEMBER_DELETE",
-                    "MEMBER_LIST",
-                    "STUDENT_CREATE", "STUDENT_VIEW", "STUDENT_UPDATE", "STUDENT_APPROVE", "STUDENT_DELETE",
-                    "STUDENT_LIST",
-                    "CONTENT_CREATE", "CONTENT_VIEW", "CONTENT_UPDATE", "CONTENT_DELETE", "CONTENT_PUBLISH",
-                    "CONTENT_ARCHIVE",
-                    "AGM_CREATE", "AGM_VIEW", "AGM_UPDATE", "AGM_DELETE", "AGM_ATTENDANCE_MARK", "AGM_REPORT",
-                    "CHAPTER_CREATE", "CHAPTER_VIEW", "CHAPTER_UPDATE", "CHAPTER_DELETE", "CHAPTER_ASSIGN_MEMBER",
-                    "CHAPTER_VIEW_MEMBERS",
-                    "REPORT_VIEW", "REPORT_EXPORT",
-                    "FEE_VIEW", "FEE_VERIFY", "FEE_REPORT",
-                    "MESSAGE_SEND", "MESSAGE_VIEW", "MESSAGE_DELETE", "DOCUMENT_CIRCULATE",
-                    "SYSTEM_SETTINGS_VIEW", "AUDIT_LOG_VIEW"));
+        // ADMIN mapping
+        roleMappings.put("ROLE_ADMIN", Arrays.asList(
+                "MEMBER_CREATE", "MEMBER_VIEW", "MEMBER_UPDATE", "MEMBER_APPROVE", "MEMBER_REJECT", "MEMBER_DELETE",
+                "MEMBER_LIST",
+                "STUDENT_CREATE", "STUDENT_VIEW", "STUDENT_UPDATE", "STUDENT_APPROVE", "STUDENT_DELETE",
+                "STUDENT_LIST",
+                "CONTENT_CREATE", "CONTENT_VIEW", "CONTENT_UPDATE", "CONTENT_DELETE", "CONTENT_PUBLISH",
+                "CONTENT_ARCHIVE",
+                "AGM_CREATE", "AGM_VIEW", "AGM_UPDATE", "AGM_DELETE", "AGM_ATTENDANCE_MARK", "AGM_REPORT",
+                "CHAPTER_CREATE", "CHAPTER_VIEW", "CHAPTER_UPDATE", "CHAPTER_DELETE", "CHAPTER_ASSIGN_MEMBER",
+                "CHAPTER_VIEW_MEMBERS",
+                "REPORT_VIEW", "REPORT_EXPORT",
+                "FEE_VIEW", "FEE_VERIFY", "FEE_REPORT",
+                "MESSAGE_SEND", "MESSAGE_VIEW", "MESSAGE_DELETE", "DOCUMENT_CIRCULATE",
+                "SYSTEM_SETTINGS_VIEW", "AUDIT_LOG_VIEW"));
 
-            // CHAPTER_ADMIN mapping
-            roleMappings.put("ROLE_CHAPTER_ADMIN", Arrays.asList(
-                    "MEMBER_VIEW", "MEMBER_UPDATE", "CHAPTER_VIEW", "CHAPTER_ASSIGN_MEMBER", "CONTENT_VIEW",
-                    "MESSAGE_SEND", "MESSAGE_VIEW"));
+        // CHAPTER_ADMIN mapping
+        roleMappings.put("ROLE_CHAPTER_ADMIN", Arrays.asList(
+                "MEMBER_VIEW", "MEMBER_UPDATE", "CHAPTER_VIEW", "CHAPTER_ASSIGN_MEMBER", "CONTENT_VIEW",
+                "MESSAGE_SEND", "MESSAGE_VIEW"));
 
-            // MEMBER mapping
-            roleMappings.put("ROLE_MEMBER", Arrays.asList(
-                    "USER_PROFILE_VIEW", "USER_PROFILE_UPDATE", "CONTENT_VIEW", "AGM_VIEW", "FEE_VIEW", "FEE_PAY",
-                    "MESSAGE_SEND", "MESSAGE_VIEW"));
+        // MEMBER mapping
+        roleMappings.put("ROLE_MEMBER", Arrays.asList(
+                "USER_PROFILE_VIEW", "USER_PROFILE_UPDATE", "CONTENT_VIEW", "AGM_VIEW", "FEE_VIEW", "FEE_PAY",
+                "MESSAGE_SEND", "MESSAGE_VIEW"));
 
-            // STUDENT mapping
-            roleMappings.put("ROLE_STUDENT", Arrays.asList(
-                    "USER_PROFILE_VIEW", "CONTENT_VIEW", "MESSAGE_VIEW"));
+        // STUDENT mapping
+        roleMappings.put("ROLE_STUDENT", Arrays.asList(
+                "USER_PROFILE_VIEW", "CONTENT_VIEW", "MESSAGE_VIEW"));
 
-            for (Map.Entry<String, List<String>> entry : roleMappings.entrySet()) {
-                Set<Permission> perms = entry.getValue().stream()
-                        .map(code -> permissionRepository.findByPermissionCode(code).orElse(null))
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toSet());
+        for (Map.Entry<String, List<String>> entry : roleMappings.entrySet()) {
+            Optional<Role> existingRole = roleRepository.findByRoleName(entry.getKey());
 
+            Set<Permission> perms = entry.getValue().stream()
+                    .map(code -> permissionRepository.findByPermissionCode(code).orElse(null))
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+
+            if (existingRole.isEmpty()) {
                 roleRepository.save(Role.builder()
                         .roleName(entry.getKey())
                         .permissions(perms)
                         .build());
+                log.info("Role {} initialized.", entry.getKey());
+            } else {
+                // Optional: Update permissions for existing roles if they changed
+                Role role = existingRole.get();
+                if (role.getPermissions().size() != perms.size()) {
+                    role.setPermissions(perms);
+                    roleRepository.save(role);
+                    log.info("Role {} permissions updated.", entry.getKey());
+                }
             }
-            log.info("Roles initialized: 5 roles with permissions created.");
         }
     }
 
@@ -155,7 +169,8 @@ public class DataLoader implements CommandLineRunner {
             userRepository.save(superAdmin);
             log.info("Default superadmin user initialized.");
         } else {
-            if (superAdmin.getRoles().isEmpty() || superAdmin.getRoles().stream().noneMatch(r -> "ROLE_SUPER_ADMIN".equals(r.getRoleName()))) {
+            if (superAdmin.getRoles().isEmpty()
+                    || superAdmin.getRoles().stream().noneMatch(r -> "ROLE_SUPER_ADMIN".equals(r.getRoleName()))) {
                 superAdmin.getRoles().clear();
                 superAdmin.getRoles().add(superAdminRole);
                 userRepository.save(superAdmin);
@@ -218,6 +233,10 @@ public class DataLoader implements CommandLineRunner {
         }
 
         List<Chapter> chapters = chapterRepository.findAll();
+        List<EducationalLevelMaster> eduMasters = educationalLevelRepository.findAll();
+        List<WorkingSectorMaster> sectorMasters = workingSectorRepository.findAll();
+        List<GenderMaster> genderMasters = genderRepository.findAll();
+
         int memberCounter = 1;
 
         // Create 8 members per chapter
@@ -231,28 +250,35 @@ public class DataLoader implements CommandLineRunner {
                         .active(true)
                         .roles(new HashSet<>(Collections.singletonList(memberRole)))
                         .build();
-                memberUser = userRepository.save(memberUser);
+                User savedMemberUser = userRepository.save(memberUser);
 
                 Member member = Member.builder()
-                        .user(memberUser)
+                        .user(savedMemberUser)
+                        .chapter(chapter)
                         .fullName("Member " + memberCounter)
                         .phone("9" + String.format("%09d", memberCounter))
-                        .designation("Engineer")
+                        .designation("Engineer " + (memberCounter % 5))
                         .organization("TechCorp " + memberCounter)
                         .address("Address " + memberCounter + ", " + chapter.getLocation())
-                        .gender(memberCounter % 2 == 0 ? Gender.FEMALE : Gender.MALE)
+                        .educationalLevel(eduMasters.get(memberCounter % eduMasters.size()))
+                        .workingSector(sectorMasters.get(memberCounter % sectorMasters.size()))
+                        .gender(memberCounter % 2 == 0
+                                ? genderMasters.stream().filter(g -> g.getName().equals("FEMALE")).findFirst()
+                                        .orElse(genderMasters.get(0))
+                                : genderMasters.stream().filter(g -> g.getName().equals("MALE")).findFirst()
+                                        .orElse(genderMasters.get(0)))
                         .membershipStatus(MembershipStatus.ACTIVE)
                         .membershipCode("SEWAM" + String.format("%05d", memberCounter))
                         .joinedDate(LocalDate.now().minusMonths(memberCounter))
                         .build();
-                member = memberRepository.save(member);
+                memberRepository.save(member);
 
                 memberCounter++;
             }
         }
 
-        // Create 5 students
-        for (int i = 1; i <= 5; i++) {
+        // Create students and distribute across chapters
+        for (int i = 1; i <= 15; i++) {
             String studentUsername = "student" + i;
             User studentUser = User.builder()
                     .username(studentUsername)
@@ -261,21 +287,23 @@ public class DataLoader implements CommandLineRunner {
                     .active(true)
                     .roles(new HashSet<>(Collections.singletonList(studentRole)))
                     .build();
-            studentUser = userRepository.save(studentUser);
+            User savedStudentUser = userRepository.save(studentUser);
 
             Student student = Student.builder()
-                    .user(studentUser)
+                    .user(savedStudentUser)
+                    .chapter(chapters.get(i % chapters.size()))
                     .fullName("Student " + i)
                     .phone("9" + String.format("%09d", 1000 + i))
                     .institute("Engineering Institute " + i)
                     .course("B.Tech Computer Science")
+                    .educationalLevel(eduMasters.get(i % eduMasters.size()))
                     .status(MembershipStatus.ACTIVE)
                     .membershipCode("SEWAS" + String.format("%05d", i))
                     .build();
             studentRepository.save(student);
         }
 
-        log.info("Members and Students initialized: {} members and 5 students created.",
+        log.info("Members and Students initialized: {} members and {} students created.",
                 memberRepository.count(), studentRepository.count());
     }
 
@@ -293,7 +321,7 @@ public class DataLoader implements CommandLineRunner {
             return;
         }
 
-        String[] roles = {"President", "Secretary", "Co-Coordinator"};
+        String[] roles = { "President", "Secretary", "Co-Coordinator" };
         LocalDate termStart = LocalDate.now().minusYears(1);
         LocalDate termEnd = LocalDate.now().plusYears(1);
 
@@ -309,8 +337,10 @@ public class DataLoader implements CommandLineRunner {
                             .termEnd(termEnd)
                             .active(true)
                             .build();
-                    electedRepresentativeRepository.save(rep);
-                    memberIndex++;
+                    ElectedRepresentative savedRep = electedRepresentativeRepository.save(rep);
+                    if (savedRep != null) {
+                        memberIndex++;
+                    }
                 }
             }
         }
@@ -359,7 +389,8 @@ public class DataLoader implements CommandLineRunner {
             Content content = Content.builder()
                     .title(titles[i])
                     .description(descriptions[i])
-                    .contentType(i % 3 == 0 ? ContentType.NEWS : (i % 3 == 1 ? ContentType.EVENT : ContentType.PUBLICATION))
+                    .contentType(
+                            i % 3 == 0 ? ContentType.NEWS : (i % 3 == 1 ? ContentType.EVENT : ContentType.PUBLICATION))
                     .published(true)
                     .build();
             contentRepository.save(content);
@@ -507,7 +538,8 @@ public class DataLoader implements CommandLineRunner {
         int feeCounter = 0;
         for (Member member : members) {
             BigDecimal amount = feeAmounts[feeCounter % feeAmounts.length];
-            PaymentStatus status = feeCounter % 4 == 0 ? PaymentStatus.PAID : (feeCounter % 4 == 1 ? PaymentStatus.PENDING : PaymentStatus.FAILED);
+            PaymentStatus status = feeCounter % 4 == 0 ? PaymentStatus.PAID
+                    : (feeCounter % 4 == 1 ? PaymentStatus.PENDING : PaymentStatus.FAILED);
 
             MembershipFee fee = MembershipFee.builder()
                     .member(member)
@@ -600,5 +632,37 @@ public class DataLoader implements CommandLineRunner {
             systemSettingRepository.save(setting);
         }
         log.info("System settings initialized: {} settings created.", settings.size());
+    }
+
+    private void initializeMasters() {
+        if (educationalLevelRepository.count() == 0) {
+            for (EducationalLevel level : EducationalLevel.values()) {
+                educationalLevelRepository.save(EducationalLevelMaster.builder()
+                        .name(level.name())
+                        .description(level.name() + " description")
+                        .active(true)
+                        .build());
+            }
+        }
+
+        if (workingSectorRepository.count() == 0) {
+            for (WorkingSector sector : WorkingSector.values()) {
+                workingSectorRepository.save(WorkingSectorMaster.builder()
+                        .name(sector.name())
+                        .description(sector.name() + " description")
+                        .active(true)
+                        .build());
+            }
+        }
+
+        if (genderRepository.count() == 0) {
+            for (Gender gender : Gender.values()) {
+                genderRepository.save(GenderMaster.builder()
+                        .name(gender.name())
+                        .active(true)
+                        .build());
+            }
+        }
+        log.info("Master data (Educational Levels, Working Sectors, Genders) initialized.");
     }
 }

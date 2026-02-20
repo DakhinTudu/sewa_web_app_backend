@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,6 +29,7 @@ public class ElectedRepresentativeController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('CONTENT_CREATE')")
     @Operation(summary = "Add representative", description = "Add a new elected representative record")
     public ResponseEntity<ApiResponse<ElectedRepresentative>> addRep(@RequestBody ElectedRepresentative rep) {
         ElectedRepresentative saved = representativeRepository.save(rep);

@@ -1,12 +1,10 @@
 package com.sewa.entity;
 
-import com.sewa.entity.enums.Gender;
 import com.sewa.entity.enums.MembershipStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "members")
@@ -16,6 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode(callSuper = true)
+@org.hibernate.annotations.DynamicUpdate
 public class Member extends BaseEntity {
 
     @Id
@@ -46,8 +45,21 @@ public class Member extends BaseEntity {
 
     private String organization;
 
-    @Enumerated(EnumType.STRING)
-    private Gender gender;
+    @ManyToOne
+    @JoinColumn(name = "chapter_id")
+    private Chapter chapter;
+
+    @ManyToOne
+    @JoinColumn(name = "educational_level_id")
+    private EducationalLevelMaster educationalLevel;
+
+    @ManyToOne
+    @JoinColumn(name = "working_sector_id")
+    private WorkingSectorMaster workingSector;
+
+    @ManyToOne
+    @JoinColumn(name = "gender_id")
+    private GenderMaster gender;
     private String college;
     private String university;
 

@@ -45,4 +45,7 @@ public class MembershipFee extends BaseEntity {
 
     @Column(name = "financial_year", nullable = false)
     private String financialYear;
+
+    @Column(name = "remarks", length = 500)
+    private String remarks;
 }

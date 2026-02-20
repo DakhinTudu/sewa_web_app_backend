@@ -8,7 +8,8 @@ import { Modal } from '../../components/ui/Modal';
 import { Spinner } from '../../components/ui/Spinner';
 import { useToast } from '../../components/ui/Toast';
 import { Table } from '../../components/tables/Table';
-import { DocumentTextIcon } from '@heroicons/react/24/outline';
+import { PencilSquareIcon, TrashIcon, EllipsisVerticalIcon } from '@heroicons/react/24/outline';
+import { Dropdown } from '../../components/ui/Dropdown';
 
 const PAGE_SIZE = 10;
 
@@ -56,19 +57,51 @@ export default function ContentsPage() {
                             keyExtractor={(row) => row.id}
                             isLoading={false}
                             columns={[
-                                { header: 'Title', accessor: 'title' as const },
-                                { header: 'Type', accessor: 'contentType' as const },
-                                { header: 'Visibility', accessor: 'visibility' as const },
-                                { header: 'Published', accessor: (row) => row.published ? 'Yes' : 'No' },
-                                { header: 'Date', accessor: 'eventDate' as const },
+                                {
+                                    header: 'Title',
+                                    className: 'w-full min-w-[140px] px-4',
+                                    accessor: (row) => <span className="font-medium text-secondary-900 line-clamp-1">{row.title}</span>
+                                },
+                                {
+                                    header: 'Type',
+                                    className: 'hidden sm:table-cell',
+                                    accessor: 'contentType' as const
+                                },
+                                { header: 'Visibility', className: 'hidden lg:table-cell', accessor: 'visibility' as const },
+                                { header: 'Published', className: 'hidden md:table-cell', accessor: (row) => row.published ? 'Yes' : 'No' },
+                                { header: 'Date', className: 'hidden md:table-cell', accessor: 'eventDate' as const },
                                 {
                                     header: 'Actions',
-                                    accessor: (row) => (
-                                        <div className="flex gap-2">
-                                            <button type="button" className="text-primary-600 hover:text-primary-800 text-sm font-medium" onClick={() => setEditId(row.id)}>Edit</button>
-                                            <button type="button" className="text-red-600 hover:text-red-800 text-sm font-medium" onClick={() => deleteMutation.mutate(row.id)}>Delete</button>
-                                        </div>
-                                    ),
+                                    className: 'w-0 px-2 sm:px-3 text-right',
+                                    accessor: (row) => {
+                                        const actionItems = [
+                                            {
+                                                label: 'Edit',
+                                                icon: <PencilSquareIcon className="h-4 w-4" />,
+                                                onClick: () => setEditId(row.id),
+                                            },
+                                            {
+                                                label: 'Delete',
+                                                icon: <TrashIcon className="h-4 w-4" />,
+                                                onClick: () => {
+                                                    if (window.confirm('Are you certain you want to delete this content item? This action cannot be undone.')) {
+                                                        deleteMutation.mutate(row.id);
+                                                    }
+                                                },
+                                                variant: 'danger' as const,
+                                            },
+                                        ];
+
+                                        return (
+                                            <div className="flex justify-center md:justify-end">
+                                                <Dropdown
+                                                    minimal
+                                                    icon={<EllipsisVerticalIcon className="h-5 w-5" />}
+                                                    items={actionItems}
+                                                />
+                                            </div>
+                                        );
+                                    },
                                 },
                             ]}
                         />
@@ -137,7 +170,7 @@ function ContentFormModal({ id, onClose, onSuccess }: { id?: number; onClose: ()
     };
 
     return (
-        <Modal open onClose={onClose} title={isEdit ? 'Edit content' : 'Add content'}>
+        <Modal isOpen onClose={onClose} title={isEdit ? 'Edit content' : 'Add content'}>
             <div className="space-y-4">
                 <input type="text" className="block w-full rounded-md border border-secondary-300 px-3 py-2 text-sm" placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
                 <textarea rows={3} className="block w-full rounded-md border border-secondary-300 px-3 py-2 text-sm" placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} />

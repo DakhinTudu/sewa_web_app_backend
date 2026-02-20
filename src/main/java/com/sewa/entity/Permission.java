@@ -1,5 +1,6 @@
 package com.sewa.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -26,5 +27,6 @@ public class Permission extends BaseEntity {
     private String description;
 
     @ManyToMany(mappedBy = "permissions")
+    @JsonIgnore
     private Set<Role> roles;
 }

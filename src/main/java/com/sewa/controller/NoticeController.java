@@ -25,7 +25,6 @@ public class NoticeController {
     private final NoticeService noticeService;
 
     @GetMapping
-    @PreAuthorize("hasAuthority('CONTENT_VIEW')")
     @Operation(summary = "Get all notices", description = "Fetch a list of all active notices and announcements")
     public ResponseEntity<ApiResponse<List<NoticeResponse>>> getAllNotices() {
         List<NoticeResponse> notices = noticeService.getAllNotices();

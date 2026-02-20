@@ -3,20 +3,22 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { chaptersApi } from '../../api/chapters.api';
 import { dropdownsApi } from '../../api/dropdowns.api';
 import type { ChapterResponse } from '../../types/api.types';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
+import { Card, CardContent } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Modal } from '../../components/ui/Modal';
 import { Spinner } from '../../components/ui/Spinner';
 import { useToast } from '../../components/ui/Toast';
 import { Table } from '../../components/tables/Table';
-import { MapPinIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { PencilIcon, TrashIcon, EyeIcon, EllipsisVerticalIcon } from '@heroicons/react/24/outline';
+import { Dropdown } from '../../components/ui/Dropdown';
 
 const PAGE_SIZE = 10;
 
 export default function ChaptersPage() {
     const [page, setPage] = useState(0);
     const [editId, setEditId] = useState<number | null>(null);
+    const [viewId, setViewId] = useState<number | null>(null);
     const [createOpen, setCreateOpen] = useState(false);
     const toast = useToast();
     const queryClient = useQueryClient();
@@ -64,30 +66,58 @@ export default function ChaptersPage() {
                             keyExtractor={(row) => row.id}
                             isLoading={false}
                             columns={[
-                                { header: 'Name', accessor: 'chapterName' as const },
-                                { header: 'Location', accessor: 'location' as const },
-                                { header: 'Type', accessor: 'chapterType' as const },
-                                { header: 'Created', accessor: 'createdAt' as const },
+                                {
+                                    header: 'Name',
+                                    className: 'w-full min-w-[140px] px-4',
+                                    accessor: (row: ChapterResponse) => <span className="font-medium text-secondary-900 line-clamp-1">{row.chapterName}</span>
+                                },
+                                {
+                                    header: 'Location',
+                                    className: 'hidden md:table-cell',
+                                    accessor: (row: ChapterResponse) => <span className="text-secondary-700">{row.location}</span>
+                                },
+                                {
+                                    header: 'Type',
+                                    className: 'hidden md:table-cell',
+                                    accessor: (row: ChapterResponse) => <span className="text-secondary-600">{row.chapterType}</span>
+                                },
                                 {
                                     header: 'Actions',
-                                    accessor: (row) => (
-                                        <div className="flex gap-2">
-                                            <button
-                                                type="button"
-                                                className="text-primary-600 hover:text-primary-800 text-sm font-medium"
-                                                onClick={() => setEditId(row.id)}
-                                            >
-                                                <PencilIcon className="h-4 w-4" />
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className="text-red-600 hover:text-red-800 text-sm font-medium"
-                                                onClick={() => deleteMutation.mutate(row.id)}
-                                            >
-                                                <TrashIcon className="h-4 w-4" />
-                                            </button>
-                                        </div>
-                                    ),
+                                    className: 'w-0 px-2 sm:px-3 text-right',
+                                    accessor: (row) => {
+                                        const actionItems: { label: string; icon: any; onClick: () => void; variant?: 'default' | 'danger' }[] = [
+                                            {
+                                                label: 'View details',
+                                                icon: <EyeIcon className="h-4 w-4" />,
+                                                onClick: () => setViewId(row.id),
+                                            },
+                                            {
+                                                label: 'Edit chapter',
+                                                icon: <PencilIcon className="h-4 w-4" />,
+                                                onClick: () => setEditId(row.id),
+                                            },
+                                            {
+                                                label: 'Delete',
+                                                icon: <TrashIcon className="h-4 w-4" />,
+                                                onClick: () => {
+                                                    if (window.confirm('Are you certain you want to delete this chapter? All associated data will be affected.')) {
+                                                        deleteMutation.mutate(row.id);
+                                                    }
+                                                },
+                                                variant: 'danger',
+                                            },
+                                        ];
+
+                                        return (
+                                            <div className="flex justify-center md:justify-end">
+                                                <Dropdown
+                                                    minimal
+                                                    icon={<EllipsisVerticalIcon className="h-5 w-5" />}
+                                                    items={actionItems}
+                                                />
+                                            </div>
+                                        );
+                                    },
                                 },
                             ]}
                         />
@@ -125,7 +155,84 @@ export default function ChaptersPage() {
                     chapterTypes={chapterTypes ?? []}
                 />
             )}
+            {viewId != null && (
+                <ChapterDetailModal
+                    id={viewId}
+                    onClose={() => setViewId(null)}
+                    onEdit={() => { setViewId(null); setEditId(viewId); }}
+                />
+            )}
         </div>
+    );
+}
+
+function ChapterDetailModal({
+    id,
+    onClose,
+    onEdit,
+}: {
+    id: number;
+    onClose: () => void;
+    onEdit: () => void;
+}) {
+    const { data: chapter, isLoading } = useQuery({
+        queryKey: ['chapter', id],
+        queryFn: () => chaptersApi.getChapterById(id),
+    });
+
+    return (
+        <Modal isOpen={true} onClose={onClose} title="Chapter details" maxWidth="2xl">
+            {isLoading ? (
+                <div className="flex justify-center py-12"><Spinner size="lg" /></div>
+            ) : chapter ? (
+                <>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div><p className="text-xs font-medium text-secondary-500 uppercase">Chapter name</p><p className="text-secondary-900 font-medium">{chapter.chapterName}</p></div>
+                        <div><p className="text-xs font-medium text-secondary-500 uppercase">Location</p><p className="text-secondary-900">{chapter.location}</p></div>
+                        <div><p className="text-xs font-medium text-secondary-500 uppercase">Type</p><p className="text-secondary-900">{chapter.chapterType}</p></div>
+                        <div><p className="text-xs font-medium text-secondary-500 uppercase">Total Members</p><p className="text-secondary-900 font-bold">{chapter.totalMembers ?? 0}</p></div>
+                        <div><p className="text-xs font-medium text-secondary-500 uppercase">Created</p><p className="text-secondary-900">{chapter.createdAt ?? '—'}</p></div>
+                    </div>
+
+                    {chapter.representatives && chapter.representatives.length > 0 && (
+                        <div className="mt-6">
+                            <h3 className="text-sm font-semibold text-secondary-900 mb-3 border-b pb-1">Executive Body / Representatives</h3>
+                            <div className="overflow-hidden rounded-lg border border-secondary-200">
+                                <table className="min-w-full divide-y divide-secondary-200">
+                                    <thead className="bg-secondary-50">
+                                        <tr>
+                                            <th className="px-4 py-2 text-left text-xs font-medium text-secondary-500 uppercase">Name</th>
+                                            <th className="px-4 py-2 text-left text-xs font-medium text-secondary-500 uppercase">Code</th>
+                                            <th className="px-4 py-2 text-left text-xs font-medium text-secondary-500 uppercase">Role</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-secondary-200 bg-white">
+                                        {chapter.representatives.map((rep, idx) => (
+                                            <tr key={idx}>
+                                                <td className="px-4 py-2 text-sm text-secondary-900 font-medium">{rep.memberName}</td>
+                                                <td className="px-4 py-2 text-sm text-secondary-600">{rep.membershipCode}</td>
+                                                <td className="px-4 py-2 text-sm">
+                                                    <span className="inline-flex items-center rounded-full bg-primary-50 px-2 py-0.5 text-xs font-medium text-primary-700">
+                                                        {rep.role}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="flex justify-end gap-2 pt-4 border-t border-secondary-200 mt-6">
+                        <Button variant="outline" onClick={onClose}>Close</Button>
+                        <Button onClick={onEdit}>Edit</Button>
+                    </div>
+                </>
+            ) : (
+                <p className="text-secondary-500 py-4">Chapter not found.</p>
+            )}
+        </Modal>
     );
 }
 
@@ -188,7 +295,7 @@ function ChapterFormModal({
     };
 
     return (
-        <Modal open onClose={onClose} title={isEdit ? 'Edit chapter' : 'Create chapter'}>
+        <Modal isOpen onClose={onClose} title={isEdit ? 'Edit chapter' : 'Create chapter'}>
             <div className="space-y-4">
                 <Input label="Chapter name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Chapter name" />
                 <Input label="Location" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Location" />

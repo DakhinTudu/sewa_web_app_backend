@@ -1,6 +1,7 @@
 package com.sewa.controller;
 
 import com.sewa.common.dto.ApiResponse;
+import com.sewa.common.dto.PageDto;
 import com.sewa.common.util.ApiResponseBuilder;
 import com.sewa.dto.request.ChapterRequest;
 import com.sewa.dto.response.ChapterResponse;
@@ -9,7 +10,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,11 +24,17 @@ public class ChapterController {
     private final ChapterService chapterService;
 
     @GetMapping
-    @PreAuthorize("hasAuthority('CHAPTER_VIEW')")
     @Operation(summary = "Get all chapters", description = "Fetch a paginated list of all association chapters")
-    public ResponseEntity<ApiResponse<Page<ChapterResponse>>> getAllChapters(Pageable pageable) {
-        Page<ChapterResponse> chapters = chapterService.getAllChapters(pageable);
-        return ResponseEntity.ok(ApiResponseBuilder.success(chapters, "Chapters fetched"));
+    public ResponseEntity<ApiResponse<PageDto<ChapterResponse>>> getAllChapters(Pageable pageable) {
+        return ResponseEntity.ok(ApiResponseBuilder.success(
+                PageDto.from(chapterService.getAllChapters(pageable)), "Chapters fetched"));
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get chapter by ID")
+    public ResponseEntity<ApiResponse<ChapterResponse>> getChapterById(@PathVariable Integer id) {
+        ChapterResponse chapter = chapterService.getChapterById(id);
+        return ResponseEntity.ok(ApiResponseBuilder.success(chapter, "Chapter fetched"));
     }
 
     @PostMapping
@@ -81,5 +87,13 @@ public class ChapterController {
             @PathVariable Integer memberId) {
         chapterService.removeMember(chapterId, memberId);
         return ResponseEntity.ok(ApiResponseBuilder.success(null, "Member removed from chapter"));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('CHAPTER_UPDATE')")
+    @Operation(summary = "Delete chapter", description = "Soft-delete an association chapter")
+    public ResponseEntity<ApiResponse<Void>> deleteChapter(@PathVariable Integer id) {
+        chapterService.deleteChapter(id);
+        return ResponseEntity.ok(ApiResponseBuilder.success(null, "Chapter deleted"));
     }
 }

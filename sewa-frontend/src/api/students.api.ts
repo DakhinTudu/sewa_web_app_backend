@@ -2,9 +2,9 @@ import api from './axios';
 import type { ApiResponse, StudentResponse, Page } from '../types/api.types';
 
 export const studentsApi = {
-    getAllStudents: async (page = 0, size = 10): Promise<Page<StudentResponse>> => {
+    getAllStudents: async (page = 0, size = 10, filters?: { query?: string; status?: string }): Promise<Page<StudentResponse>> => {
         const response = await api.get<ApiResponse<Page<StudentResponse>>>('/students', {
-            params: { page, size },
+            params: { page, size, ...filters },
         });
         return response.data.data;
     },

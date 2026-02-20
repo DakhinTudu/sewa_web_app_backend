@@ -1,19 +1,22 @@
 package com.sewa.controller;
 
 import com.sewa.common.dto.ApiResponse;
+import com.sewa.common.dto.PageDto;
 import com.sewa.common.util.ApiResponseBuilder;
 import com.sewa.dto.response.MemberResponse;
 import com.sewa.service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/v1/members")
@@ -57,23 +60,42 @@ public class MemberController {
         return ResponseEntity.ok(ApiResponseBuilder.success(member, "Member fetched successfully"));
     }
 
+    /** Valid sortable fields on the Member entity */
+    private static final Set<String> VALID_SORT_FIELDS = Set.of(
+            "id", "fullName", "membershipCode", "membershipStatus", "joinedDate",
+            "phone", "designation", "organization", "college", "university",
+            "graduationYear", "createdAt", "updatedAt");
+
     @GetMapping
     @PreAuthorize("hasAuthority('MEMBER_LIST')")
-    @Operation(summary = "Get all members", description = "Fetch a paginated list of all members")
-    public ResponseEntity<ApiResponse<Page<MemberResponse>>> getAllMembers(Pageable pageable) {
-        Page<MemberResponse> members = memberService.getAllMembers(pageable);
-        return ResponseEntity.ok(ApiResponseBuilder.success(members, "Members list fetched"));
+    @Operation(summary = "Get all members with filters", description = "Fetch a paginated list of all members with optional filters and search query")
+    public ResponseEntity<ApiResponse<PageDto<MemberResponse>>> getAllMembers(
+            @RequestParam(required = false) Integer chapterId,
+            @RequestParam(required = false) String educationalLevel,
+            @RequestParam(required = false) String workingSector,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String query,
+            Pageable pageable) {
+        // Sanitize the sort: if any sort field is not a valid Member field, fall back
+        // to id asc
+        Sort sanitizedSort = pageable.getSort().stream()
+                .allMatch(order -> VALID_SORT_FIELDS.contains(order.getProperty()))
+                        ? pageable.getSort()
+                        : Sort.by(Sort.Direction.ASC, "id");
+        Pageable safePage = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sanitizedSort);
+        return ResponseEntity.ok(ApiResponseBuilder.success(
+                PageDto.from(memberService.searchMembers(chapterId, educationalLevel, workingSector, status, query,
+                        safePage)),
+                "Members list fetched"));
     }
 
     @GetMapping("/pending")
     @PreAuthorize("hasAuthority('MEMBER_LIST')")
     @Operation(summary = "Get pending members")
-    public ResponseEntity<ApiResponse<Page<MemberResponse>>> getPendingMembers(Pageable pageable) {
-        // Implementation might need a specific service method, but for now we can
-        // filter by status
-        // TODO: Update service to support status filtering in getAllMembers
+    public ResponseEntity<ApiResponse<PageDto<MemberResponse>>> getPendingMembers(Pageable pageable) {
         return ResponseEntity
-                .ok(ApiResponseBuilder.success(memberService.getAllMembers(pageable), "Pending members fetched"));
+                .ok(ApiResponseBuilder.success(PageDto.from(memberService.getPendingMembers(pageable)),
+                        "Pending members fetched"));
     }
 
     @PatchMapping("/{id}/approve")
@@ -121,18 +143,19 @@ public class MemberController {
     @GetMapping("/chapter/{chapterId}")
     @PreAuthorize("hasAuthority('MEMBER_LIST')")
     @Operation(summary = "Get members by chapter")
-    public ResponseEntity<ApiResponse<Page<MemberResponse>>> getByChapter(@PathVariable Integer chapterId,
+    public ResponseEntity<ApiResponse<PageDto<MemberResponse>>> getByChapter(@PathVariable Integer chapterId,
             Pageable pageable) {
-        Page<MemberResponse> members = memberService.getMembersByChapter(chapterId, pageable);
-        return ResponseEntity.ok(ApiResponseBuilder.success(members, "Chapter members fetched"));
+        return ResponseEntity.ok(ApiResponseBuilder.success(
+                PageDto.from(memberService.getMembersByChapter(chapterId, pageable)), "Chapter members fetched"));
     }
 
     @GetMapping("/chapter/{chapterId}/active")
     @PreAuthorize("hasAuthority('MEMBER_LIST')")
     @Operation(summary = "Get active members by chapter")
-    public ResponseEntity<ApiResponse<Page<MemberResponse>>> getActiveByChapter(@PathVariable Integer chapterId,
+    public ResponseEntity<ApiResponse<PageDto<MemberResponse>>> getActiveByChapter(@PathVariable Integer chapterId,
             Pageable pageable) {
-        Page<MemberResponse> members = memberService.getMembersByChapterAndStatus(chapterId, "ACTIVE", pageable);
-        return ResponseEntity.ok(ApiResponseBuilder.success(members, "Active chapter members fetched"));
+        return ResponseEntity.ok(ApiResponseBuilder.success(
+                PageDto.from(memberService.getMembersByChapterAndStatus(chapterId, "ACTIVE", pageable)),
+                "Active chapter members fetched"));
     }
 }

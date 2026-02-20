@@ -17,7 +17,7 @@ export default function ProtectedRoute({ requiredPermission }: ProtectedRoutePro
         return <Navigate to="/login" state={{ from: location }} replace />;
     }
 
-    if (requiredPermission && user && !user.permissions.includes(requiredPermission)) {
+    if (requiredPermission && user && !user.permissions?.includes(requiredPermission)) {
         // Redirect to dashboard or specialized 403 page
         return <Navigate to="/dashboard" replace />;
     }

@@ -1,6 +1,5 @@
 package com.sewa.dto.response;
 
-import com.sewa.entity.enums.Gender;
 import com.sewa.entity.enums.MembershipStatus;
 import lombok.Builder;
 import lombok.Data;
@@ -22,10 +21,14 @@ public class MemberResponse {
     private MembershipStatus membershipStatus;
     private LocalDate joinedDate;
     private String organization;
-    private Gender gender;
+    private String gender;
     private String college;
     private String university;
     private Integer graduationYear;
+    private Integer chapterId;
+    private String chapterName;
+    private String educationalLevel;
+    private String workingSector;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

@@ -1,5 +1,6 @@
 package com.sewa.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -29,6 +30,7 @@ public class User extends BaseEntity {
     private String email;
 
     @Column(name = "password_hash", nullable = false)
+    @JsonIgnore
     private String password;
 
     @Column(name = "is_active")
