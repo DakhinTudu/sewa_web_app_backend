@@ -1,0 +1,21 @@
+# Netlify config at repo root so the build uses the frontend subfolder.
+# https://docs.netlify.com/configure-builds/file-based-configuration/
+
+[build]
+  base     = "sewa-frontend"
+  command  = "npm run build"
+  publish  = "dist"
+
+# SPA: serve index.html for all routes (React Router)
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200
+  force  = true
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options         = "DENY"
+    X-Content-Type-Options  = "nosniff"
+    Referrer-Policy        = "strict-origin-when-cross-origin"
