@@ -2,7 +2,7 @@
 # https://docs.netlify.com/configure-builds/file-based-configuration/
 
 [build]
-  command  = "cd sewa-frontend && npm run build"
+  command  = "cd sewa-frontend && npm ci && npm run build"
   publish  = "sewa-frontend/dist"
 
 # SPA: serve index.html for all routes (React Router)
