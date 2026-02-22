@@ -43,12 +43,13 @@ api.interceptors.response.use(
         console.error('Full Error:', error);
 
         if (status === 401) {
-            // Clear token and redirect to login if needed
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            // Check if we are already on login page to avoid loops
-            if (!window.location.pathname.includes('/login')) {
-                window.location.href = '/login';
+            const isLoginRequest = error.config?.url?.includes('/auth/login');
+            if (!isLoginRequest) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                if (!window.location.pathname.includes('/login')) {
+                    window.location.href = '/login';
+                }
             }
         }
 

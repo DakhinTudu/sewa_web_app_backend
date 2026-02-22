@@ -13,13 +13,19 @@ import {
     ChatBubbleLeftRightIcon,
     CurrencyRupeeIcon,
     Cog6ToothIcon,
+    EnvelopeIcon,
     ArrowRightOnRectangleIcon,
+    BellAlertIcon,
 } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../../auth/AuthProvider';
 import { Logo } from '../Logo';
+import { announcementsApi } from '../../api/announcements.api';
+import { communicationsApi } from '../../api/communications.api';
+import { membersApi } from '../../api/members.api';
 
-const navigation = [
+const baseNavigation = [
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
     { name: 'Profile', href: '/dashboard/profile', icon: UserIcon },
     { name: 'Membership', href: '/dashboard/membership', icon: UsersIcon },
@@ -29,6 +35,7 @@ const navigation = [
     { name: 'Calendar', href: '/dashboard/calendar', icon: CalendarIcon },
     { name: 'Messages', href: '/dashboard/messages', icon: ChatBubbleLeftRightIcon },
     { name: 'Payments', href: '/dashboard/payments', icon: CurrencyRupeeIcon },
+    { name: 'Communications', href: '/dashboard/communications', icon: EnvelopeIcon },
     { name: 'Admin', href: '/dashboard/admin', icon: Cog6ToothIcon },
 ];
 
@@ -37,6 +44,42 @@ export default function DashboardLayout() {
     const location = useLocation();
     const navigate = useNavigate();
     const { user, logout } = useAuth();
+
+    const { data: announcements = [] } = useQuery({
+        queryKey: ['announcements-list'],
+        queryFn: announcementsApi.list,
+        enabled: !!user,
+        retry: false,
+    });
+    const { data: announcementsUnread = 0 } = useQuery({
+        queryKey: ['announcements-unread-count'],
+        queryFn: announcementsApi.getUnreadCount,
+        enabled: !!user,
+        retry: false,
+    });
+    const { data: communicationsReceived = [] } = useQuery({
+        queryKey: ['communications-received'],
+        queryFn: communicationsApi.getReceivedByMe,
+        enabled: !!user,
+        retry: false,
+    });
+    const { data: communicationsReceivedUnread = 0 } = useQuery({
+        queryKey: ['communications-received-unread-count'],
+        queryFn: communicationsApi.getReceivedUnreadCount,
+        enabled: !!user,
+        retry: false,
+    });
+    const canSeePending = !!user && (user.roles?.includes('ROLE_SUPER_ADMIN') || user.roles?.includes('ROLE_ADMIN') || user.permissions?.includes('MEMBER_APPROVE'));
+    const { data: pendingMembersPage } = useQuery({
+        queryKey: ['pending-members-bell'],
+        queryFn: () => membersApi.getPendingMembers(0, 5),
+        enabled: canSeePending,
+        retry: false,
+    });
+    const pendingCount = pendingMembersPage?.totalElements ?? 0;
+    const totalUnreadCount = announcementsUnread + communicationsReceivedUnread + pendingCount;
+
+    const navigation = baseNavigation;
 
     const handleLogout = () => {
         logout();
@@ -206,16 +249,29 @@ export default function DashboardLayout() {
                             <div className="hidden sm:block text-sm font-semibold leading-6 text-gray-900 truncate">
                                 SEWA Dashboard
                             </div>
-                            <div className="flex items-center gap-2">
-                                <span className="text-sm text-gray-600 truncate max-w-[120px] sm:max-w-[180px]">{user?.username}</span>
+                            <Link
+                                to="/dashboard/notifications"
+                                className="relative rounded-md p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center text-gray-600 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500 touch-manipulation"
+                                title="Notifications"
+                            >
+                                <span className="sr-only">Notifications</span>
+                                <BellAlertIcon className="h-6 w-6" aria-hidden="true" />
+                                {totalUnreadCount > 0 && (
+                                    <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white">
+                                        {totalUnreadCount > 99 ? '99+' : totalUnreadCount}
+                                    </span>
+                                )}
+                            </Link>
+                            <div className="flex items-center gap-1 sm:gap-2">
+                                <span className="hidden sm:inline text-sm text-gray-600 truncate max-w-[120px] md:max-w-[180px]">{user?.username}</span>
                                 <button
                                     type="button"
                                     onClick={handleLogout}
-                                    className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-primary-600 min-h-[44px] sm:min-h-0"
+                                    className="inline-flex items-center justify-center rounded-md p-2.5 sm:px-3 sm:py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 text-sm font-medium hover:text-primary-600 min-h-[44px] min-w-[44px] sm:min-w-0 sm:min-h-0"
                                     title="Logout"
                                 >
-                                    <ArrowRightOnRectangleIcon className="h-5 w-5" />
-                                    <span className="hidden sm:inline">Logout</span>
+                                    <ArrowRightOnRectangleIcon className="h-5 w-5 flex-shrink-0" />
+                                    <span className="hidden sm:inline ml-0 sm:ml-1">Logout</span>
                                 </button>
                             </div>
                         </div>

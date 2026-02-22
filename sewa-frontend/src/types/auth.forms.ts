@@ -1,11 +1,29 @@
 import { z } from 'zod';
 
 export const LoginSchema = z.object({
-    username: z.string().min(1, 'Username is required'),
+    login: z.string().min(1, 'Email or username is required'),
     password: z.string().min(1, 'Password is required'),
 });
 
 export type LoginFormValues = z.infer<typeof LoginSchema>;
+
+export const ForgotPasswordEmailSchema = z.object({
+    email: z.string().email('Invalid email address'),
+});
+export type ForgotPasswordEmailValues = z.infer<typeof ForgotPasswordEmailSchema>;
+
+export const ResetPasswordSchema = z
+    .object({
+        email: z.string().email('Invalid email'),
+        otp: z.string().length(6, 'OTP must be 6 digits'),
+        newPassword: z.string().min(6, 'Password must be at least 6 characters'),
+        confirmPassword: z.string().min(6, 'Please confirm your password'),
+    })
+    .refine((data) => data.newPassword === data.confirmPassword, {
+        message: 'Passwords do not match',
+        path: ['confirmPassword'],
+    });
+export type ResetPasswordFormValues = z.infer<typeof ResetPasswordSchema>;
 
 // Member Registration Schema
 export const RegisterMemberSchema = z.object({

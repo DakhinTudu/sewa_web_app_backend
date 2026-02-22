@@ -5,6 +5,8 @@ import com.sewa.entity.Member;
 import com.sewa.entity.User;
 import com.sewa.entity.enums.MembershipStatus;
 import com.sewa.exception.SewaException;
+import com.sewa.repository.ChapterRepository;
+import com.sewa.repository.ElectedRepresentativeRepository;
 import com.sewa.repository.MemberRepository;
 import com.sewa.repository.UserRepository;
 import com.sewa.repository.EducationalLevelRepository;
@@ -15,6 +17,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -22,7 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
+    private final ElectedRepresentativeRepository electedRepresentativeRepository;
     private final UserRepository userRepository;
+    private final ChapterRepository chapterRepository;
     private final EducationalLevelRepository educationalLevelRepository;
     private final WorkingSectorRepository workingSectorRepository;
     private final GenderRepository genderRepository;
@@ -136,23 +143,36 @@ public class MemberServiceImpl implements MemberService {
             member.setFullName(request.getFullName());
         member.setPhone(request.getPhone());
         member.setAddress(request.getAddress());
+        member.setPermanentAddress(request.getPermanentAddress());
         member.setDesignation(request.getDesignation());
         member.setOrganization(request.getOrganization());
         member.setCollege(request.getCollege());
         member.setUniversity(request.getUniversity());
         member.setGraduationYear(request.getGraduationYear());
-        if (request.getEducationalLevel() != null) {
+        if (request.getEducationalLevel() != null && !request.getEducationalLevel().isBlank()) {
             member.setEducationalLevel(educationalLevelRepository.findByName(request.getEducationalLevel())
                     .orElseThrow(
                             () -> new SewaException("Educational Level not found: " + request.getEducationalLevel())));
+        } else {
+            member.setEducationalLevel(null);
         }
-        if (request.getWorkingSector() != null) {
+        if (request.getWorkingSector() != null && !request.getWorkingSector().isBlank()) {
             member.setWorkingSector(workingSectorRepository.findByName(request.getWorkingSector())
                     .orElseThrow(() -> new SewaException("Working Sector not found: " + request.getWorkingSector())));
+        } else {
+            member.setWorkingSector(null);
         }
-        if (request.getGender() != null) {
+        if (request.getGender() != null && !request.getGender().isBlank()) {
             member.setGender(genderRepository.findByName(request.getGender())
                     .orElseThrow(() -> new SewaException("Gender not found: " + request.getGender())));
+        } else {
+            member.setGender(null);
+        }
+        if (request.getChapterId() != null) {
+            member.setChapter(chapterRepository.findById(request.getChapterId())
+                    .orElseThrow(() -> new SewaException("Chapter not found: " + request.getChapterId())));
+        } else {
+            member.setChapter(null);
         }
 
         return mapToResponse(memberRepository.save(member));
@@ -200,11 +220,20 @@ public class MemberServiceImpl implements MemberService {
         MembershipStatus s = status != null ? MembershipStatus.valueOf(status.toUpperCase()) : null;
         String statusStr = s != null ? s.name() : null;
         String formattedQuery = (query != null && !query.isEmpty()) ? query : null;
-        return memberRepository.searchMembers(chapterId, eduLevel, sector, statusStr, formattedQuery, pageable)
-                .map(this::mapToResponse);
+        Set<Integer> representativeMemberIds = electedRepresentativeRepository.findByActiveTrue().stream()
+                .map(er -> er.getMember() != null ? er.getMember().getId() : null)
+                .filter(java.util.Objects::nonNull)
+                .collect(Collectors.toSet());
+        return memberRepository.searchMembersOrderByRepresentativeThenRecent(
+                chapterId, eduLevel, sector, statusStr, formattedQuery, pageable)
+                .map(m -> mapToResponse(m, representativeMemberIds.contains(m.getId())));
     }
 
     private MemberResponse mapToResponse(Member member) {
+        return mapToResponse(member, false);
+    }
+
+    private MemberResponse mapToResponse(Member member, boolean representative) {
         return MemberResponse.builder()
                 .id(member.getId())
                 .username(member.getUser() != null ? member.getUser().getUsername() : null)
@@ -213,6 +242,7 @@ public class MemberServiceImpl implements MemberService {
                 .fullName(member.getFullName())
                 .phone(member.getPhone())
                 .address(member.getAddress())
+                .permanentAddress(member.getPermanentAddress())
                 .designation(member.getDesignation())
                 .membershipStatus(member.getMembershipStatus())
                 .joinedDate(member.getJoinedDate())
@@ -227,6 +257,7 @@ public class MemberServiceImpl implements MemberService {
                 .workingSector(member.getWorkingSector() != null ? member.getWorkingSector().getName() : null)
                 .createdAt(member.getCreatedAt())
                 .updatedAt(member.getUpdatedAt())
+                .representative(representative)
                 .build();
     }
 }

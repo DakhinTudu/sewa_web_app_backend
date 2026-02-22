@@ -25,7 +25,7 @@ export function Dropdown({ label, items, align = 'right', icon, minimal = false 
         <Menu as="div" className="relative inline-block text-left">
             <div>
                 {minimal ? (
-                    <MenuButton className="flex items-center rounded-full bg-gray-100 p-2 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
+                    <MenuButton className="flex items-center justify-center rounded-md p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1">
                         <span className="sr-only">Open options</span>
                         {icon || <ChevronDownIcon className="h-5 w-5" aria-hidden="true" />}
                     </MenuButton>
@@ -47,10 +47,9 @@ export function Dropdown({ label, items, align = 'right', icon, minimal = false 
                 leaveTo="transform opacity-0 scale-95"
             >
                 <MenuItems
-                    className={cn(
-                        "absolute z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none",
-                        align === 'right' ? "right-0" : "left-0"
-                    )}
+                    anchor={align === 'right' ? 'bottom end' : 'bottom start'}
+                    portal
+                    className="z-[9999] w-56 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none [--anchor-gap:4px]"
                 >
                     <div className="py-1">
                         {items.map((item, index) => (

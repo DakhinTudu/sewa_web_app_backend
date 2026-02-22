@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public interface MembershipFeeRepository extends JpaRepository<MembershipFee, Integer> {
@@ -23,4 +24,11 @@ public interface MembershipFeeRepository extends JpaRepository<MembershipFee, In
                         @org.springframework.data.repository.query.Param("status") com.sewa.entity.enums.PaymentStatus status,
                         @org.springframework.data.repository.query.Param("year") String year,
                         org.springframework.data.domain.Pageable pageable);
+
+        @org.springframework.data.jpa.repository.Query("SELECT DISTINCT f.member.id FROM MembershipFee f " +
+                "WHERE f.financialYear = :financialYear AND f.paymentStatus = :status " +
+                "AND (f.isDeleted = false OR f.isDeleted IS NULL)")
+        Set<Integer> findDistinctMemberIdsByFinancialYearAndPaymentStatus(
+                @org.springframework.data.repository.query.Param("financialYear") String financialYear,
+                @org.springframework.data.repository.query.Param("status") com.sewa.entity.enums.PaymentStatus status);
 }

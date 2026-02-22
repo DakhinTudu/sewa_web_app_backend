@@ -121,28 +121,70 @@ export default function MemberListPage() {
     const columns = [
         {
             header: 'Name',
-            className: 'w-full min-w-[140px] px-4',
+            className: 'min-w-[140px] px-3 md:px-4',
             accessor: (row: MemberResponse) => (
-                <span className="font-medium text-secondary-900 line-clamp-1">{row.fullName}</span>
+                <span className="font-medium text-secondary-900">{row.fullName}</span>
+            ),
+        },
+        {
+            header: 'Code',
+            className: 'hidden md:table-cell w-0 min-w-0 px-3 md:px-4 whitespace-nowrap max-w-[100px]',
+            accessor: (row: MemberResponse) => (
+                <span className="text-secondary-600 font-mono text-sm truncate block" title={row.membershipCode || ''}>{row.membershipCode || '—'}</span>
+            ),
+        },
+        {
+            header: 'Email',
+            className: 'hidden md:table-cell min-w-[200px] px-3 md:px-4',
+            accessor: (row: MemberResponse) => (
+                <span className="text-secondary-700 text-sm break-all">{row.email || '—'}</span>
+            ),
+        },
+        {
+            header: 'Phone',
+            className: 'hidden lg:table-cell min-w-[120px] px-3 md:px-4 whitespace-nowrap',
+            accessor: (row: MemberResponse) => (
+                <span className="text-secondary-700 text-sm">{row.phone || '—'}</span>
             ),
         },
         {
             header: 'Chapter',
-            className: 'hidden md:table-cell',
+            className: 'hidden lg:table-cell min-w-[140px] px-3 md:px-4',
             accessor: (row: MemberResponse) => (
-                <span className="text-secondary-700">{row.chapterName || '—'}</span>
+                <span className="text-secondary-700 text-sm">{row.chapterName || '—'}</span>
             ),
         },
         {
-            header: 'Position',
-            className: 'hidden md:table-cell',
+            header: 'Designation',
+            className: 'hidden xl:table-cell px-3 md:px-4',
             accessor: (row: MemberResponse) => (
                 <span className="text-secondary-600 text-sm whitespace-nowrap">{row.designation || '—'}</span>
             ),
         },
         {
+            header: 'Organization',
+            className: 'hidden xl:table-cell px-3 md:px-4 max-w-[140px]',
+            accessor: (row: MemberResponse) => (
+                <span className="text-secondary-600 text-sm truncate block" title={row.organization}>{row.organization || '—'}</span>
+            ),
+        },
+        {
+            header: 'Education',
+            className: 'hidden xl:table-cell px-3 md:px-4',
+            accessor: (row: MemberResponse) => (
+                <span className="text-secondary-600 text-sm">{row.educationalLevel || '—'}</span>
+            ),
+        },
+        {
+            header: 'Sector',
+            className: 'hidden xl:table-cell px-3 md:px-4',
+            accessor: (row: MemberResponse) => (
+                <span className="text-secondary-600 text-sm">{row.workingSector ? row.workingSector.replace('_', ' ') : '—'}</span>
+            ),
+        },
+        {
             header: 'Status',
-            className: 'w-0 px-2 sm:px-3 text-center',
+            className: 'w-0 px-2 md:px-3 text-center whitespace-nowrap',
             accessor: (row: MemberResponse) => (
                 <div className="flex justify-center">
                     <StatusBadge status={row.membershipStatus} showLabel={false} />
@@ -150,8 +192,27 @@ export default function MemberListPage() {
             )
         },
         {
-            header: 'Actions',
-            className: 'w-0 px-2 sm:px-3 text-right',
+            header: 'Rep',
+            className: 'hidden md:table-cell px-2 md:px-3 text-center w-12',
+            accessor: (row: MemberResponse) => (
+                row.representative ? (
+                    <span className="inline-flex items-center rounded-md bg-primary-100 px-2 py-0.5 text-xs font-medium text-primary-700" title="Representative">Rep</span>
+                ) : (
+                    <span className="text-secondary-400">—</span>
+                )
+            ),
+        },
+        {
+            header: 'Joined',
+            className: 'hidden lg:table-cell px-3 md:px-4 whitespace-nowrap text-sm text-secondary-600',
+            accessor: (row: MemberResponse) => (
+                <span>{row.joinedDate ? new Date(row.joinedDate).toLocaleDateString() : '—'}</span>
+            ),
+        },
+        {
+            header: '',
+            className: 'w-0 px-1 py-2 text-center min-w-[44px]',
+            stickyRight: true,
             accessor: (row: MemberResponse) => {
                 const actionItems: { label: string; icon: any; onClick: () => void; variant?: 'default' | 'danger' }[] = [
                     {
@@ -194,10 +255,10 @@ export default function MemberListPage() {
                 });
 
                 return (
-                    <div className="flex justify-center md:justify-end">
+                    <div className="flex justify-center">
                         <Dropdown
                             minimal
-                            icon={<EllipsisVerticalIcon className="h-5 w-5" />}
+                            icon={<EllipsisVerticalIcon className="h-5 w-5 text-gray-500" />}
                             items={actionItems}
                         />
                     </div>

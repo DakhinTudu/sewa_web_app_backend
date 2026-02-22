@@ -1,11 +1,10 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-// import api from '../api/axios';
+import { authApi } from '../api/auth.api';
 
 interface User {
     username: string;
     roles: string[];
     permissions: string[];
-    // Add other fields as needed
 }
 
 interface AuthContextType {
@@ -23,11 +22,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        // Init auth from local storage
         const token = localStorage.getItem('token');
         const storedUser = localStorage.getItem('user');
         if (token && storedUser) {
-            setUser(JSON.parse(storedUser));
+            const parsed = JSON.parse(storedUser) as User;
+            setUser(parsed);
+            // Refresh user from server so we always have up-to-date permissions (e.g. COMMUNICATIONS_SEND, ANNOUNCEMENT_VIEW)
+            authApi.me().then((data) => {
+                const refreshed = {
+                    username: data.username,
+                    roles: Array.from(data.roles ?? []),
+                    permissions: data.permissions ? Array.from(data.permissions) : [],
+                };
+                setUser(refreshed);
+                localStorage.setItem('user', JSON.stringify(refreshed));
+            }).catch(() => {
+                // Token invalid or network error – keep stored user
+            });
         }
         setIsLoading(false);
     }, []);

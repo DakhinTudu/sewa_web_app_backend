@@ -36,23 +36,23 @@ export default function LoginPage() {
             // Transform API response to internal User format
             const user = {
                 username: data.username,
-                roles: Array.from(data.roles), // Set to Array
-                permissions: [] // Permissions might need to be fetched or derived
+                roles: Array.from(data.roles ?? []),
+                permissions: data.permissions ? Array.from(data.permissions) : []
             };
             login(data.token, user);
             toast.success('Login successful! Redirecting...');
             navigate(from, { replace: true });
         },
         onError: (error: any) => {
-            console.error('❌ Login Error:', error);
-            console.error('Error Details:', {
-                status: error.response?.status,
-                statusText: error.response?.statusText,
-                message: error.response?.data?.message,
-                data: error.response?.data,
-                fullError: error
-            });
-            const errorMessage = error.response?.data?.message || error.message || 'Invalid username or password';
+            const data = error.response?.data;
+            const message = data?.message;
+            const errors = data?.data;
+            const firstFieldError =
+                errors && typeof errors === 'object'
+                    ? Object.values(errors).find((v) => typeof v === 'string') as string | undefined
+                    : undefined;
+            const errorMessage =
+                firstFieldError || message || error.message || 'Invalid email/username or password';
             setLoginError(errorMessage);
             toast.error(errorMessage);
         }
@@ -94,12 +94,13 @@ export default function LoginPage() {
                         )}
 
                         <Input
-                            id="username"
-                            label="Username"
+                            id="login"
+                            label="Email or username"
                             type="text"
                             autoComplete="username"
-                            error={errors.username?.message}
-                            {...register('username')}
+                            placeholder="Enter your email or username"
+                            error={errors.login?.message}
+                            {...register('login')}
                         />
 
                         <Input
@@ -110,6 +111,15 @@ export default function LoginPage() {
                             error={errors.password?.message}
                             {...register('password')}
                         />
+
+                        <div className="flex justify-end">
+                            <Link
+                                to="/forgot-password"
+                                className="text-sm text-primary-600 hover:text-primary-700"
+                            >
+                                Forgot password?
+                            </Link>
+                        </div>
 
                         <Button
                             type="submit"

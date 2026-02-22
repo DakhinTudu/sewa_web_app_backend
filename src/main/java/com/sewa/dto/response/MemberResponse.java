@@ -17,6 +17,7 @@ public class MemberResponse {
     private String fullName;
     private String phone;
     private String address;
+    private String permanentAddress;
     private String designation;
     private MembershipStatus membershipStatus;
     private LocalDate joinedDate;
@@ -31,4 +32,5 @@ public class MemberResponse {
     private String workingSector;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Boolean representative;
 }

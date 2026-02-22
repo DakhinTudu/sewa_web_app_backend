@@ -25,7 +25,7 @@ public class MessagingController {
     private final InternalMessageService messageService;
 
     @GetMapping
-    @PreAuthorize("hasAuthority('MESSAGE_VIEW')")
+    @PreAuthorize("hasAuthority('MESSAGE_VIEW') or hasRole('SUPER_ADMIN') or hasRole('ADMIN')")
     @Operation(summary = "Get all messages", description = "Fetch all internal messages for the current user")
     public ResponseEntity<ApiResponse<List<MessageResponse>>> getAllMessages() {
         List<MessageResponse> messages = messageService.getAllMessages();
@@ -33,7 +33,7 @@ public class MessagingController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('MESSAGE_SEND')")
+    @PreAuthorize("hasAuthority('MESSAGE_SEND') or hasRole('SUPER_ADMIN') or hasRole('ADMIN')")
     @Operation(summary = "Send message", description = "Send a new internal message")
     public ResponseEntity<ApiResponse<MessageResponse>> sendMessage(Principal principal,
             @Valid @RequestBody MessageRequest message) {

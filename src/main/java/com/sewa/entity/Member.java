@@ -34,6 +34,10 @@ public class Member extends BaseEntity {
 
     private String phone;
     private String address;
+
+    @Column(name = "permanent_address")
+    private String permanentAddress;
+
     private String designation;
 
     @Enumerated(EnumType.STRING)

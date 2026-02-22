@@ -10,13 +10,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/api/v1/members")
@@ -60,12 +58,6 @@ public class MemberController {
         return ResponseEntity.ok(ApiResponseBuilder.success(member, "Member fetched successfully"));
     }
 
-    /** Valid sortable fields on the Member entity */
-    private static final Set<String> VALID_SORT_FIELDS = Set.of(
-            "id", "fullName", "membershipCode", "membershipStatus", "joinedDate",
-            "phone", "designation", "organization", "college", "university",
-            "graduationYear", "createdAt", "updatedAt");
-
     @GetMapping
     @PreAuthorize("hasAuthority('MEMBER_LIST')")
     @Operation(summary = "Get all members with filters", description = "Fetch a paginated list of all members with optional filters and search query")
@@ -76,16 +68,11 @@ public class MemberController {
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String query,
             Pageable pageable) {
-        // Sanitize the sort: if any sort field is not a valid Member field, fall back
-        // to id asc
-        Sort sanitizedSort = pageable.getSort().stream()
-                .allMatch(order -> VALID_SORT_FIELDS.contains(order.getProperty()))
-                        ? pageable.getSort()
-                        : Sort.by(Sort.Direction.ASC, "id");
-        Pageable safePage = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sanitizedSort);
+        // Order: representative first, then recent (created_at desc). Ignore client sort.
+        Pageable pageReq = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
         return ResponseEntity.ok(ApiResponseBuilder.success(
                 PageDto.from(memberService.searchMembers(chapterId, educationalLevel, workingSector, status, query,
-                        safePage)),
+                        pageReq)),
                 "Members list fetched"));
     }
 

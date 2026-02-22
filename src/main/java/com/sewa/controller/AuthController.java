@@ -4,7 +4,10 @@ import com.sewa.common.dto.ApiResponse;
 import com.sewa.common.util.ApiResponseBuilder;
 import com.sewa.dto.request.AuthRequest;
 import com.sewa.dto.request.RegisterRequest;
+import com.sewa.dto.request.ResetPasswordRequest;
+import com.sewa.dto.request.ValidateOtpRequest;
 import com.sewa.dto.response.AuthResponse;
+import com.sewa.dto.response.ForgotPasswordResponse;
 import com.sewa.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,7 +32,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    @Operation(summary = "Authenticate user", description = "Login with username and password to receive JWT")
+    @Operation(summary = "Authenticate user", description = "Login with email or username and password to receive JWT")
     public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody AuthRequest request) {
         AuthResponse response = authService.login(request);
         return ResponseEntity.ok(ApiResponseBuilder.success(response, "Login successful"));
@@ -50,17 +53,25 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    @Operation(summary = "Forgot password", description = "Request a password reset link via email")
-    public ResponseEntity<ApiResponse<Void>> forgotPassword(@RequestParam String email) {
+    @Operation(summary = "Forgot password", description = "Request a 6-digit OTP sent to the account email")
+    public ResponseEntity<ApiResponse<ForgotPasswordResponse>> forgotPassword(@RequestParam String email) {
         authService.forgotPassword(email);
-        return ResponseEntity.ok(ApiResponseBuilder.success(null, "Password reset email sent if account exists"));
+        return ResponseEntity.ok(ApiResponseBuilder.success(
+                ForgotPasswordResponse.builder().email(email).build(),
+                "If an account exists with this email, an OTP has been sent. Check your inbox."));
+    }
+
+    @PostMapping("/validate-otp")
+    @Operation(summary = "Validate OTP", description = "Check if the OTP is valid and not expired (does not consume the OTP)")
+    public ResponseEntity<ApiResponse<Void>> validateOtp(@Valid @RequestBody ValidateOtpRequest request) {
+        authService.validateOtp(request.getEmail(), request.getOtp());
+        return ResponseEntity.ok(ApiResponseBuilder.success(null, "OTP is valid"));
     }
 
     @PostMapping("/reset-password")
-    @Operation(summary = "Reset password", description = "Reset password using a valid token")
-    public ResponseEntity<ApiResponse<Void>> resetPassword(@RequestParam String token,
-            @RequestParam String newPassword) {
-        authService.resetPassword(token, newPassword);
+    @Operation(summary = "Reset password", description = "Reset password using email, OTP and new password")
+    public ResponseEntity<ApiResponse<Void>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request);
         return ResponseEntity.ok(ApiResponseBuilder.success(null, "Password reset successful"));
     }
 }

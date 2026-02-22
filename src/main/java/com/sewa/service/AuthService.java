@@ -2,6 +2,7 @@ package com.sewa.service;
 
 import com.sewa.dto.request.AuthRequest;
 import com.sewa.dto.request.RegisterRequest;
+import com.sewa.dto.request.ResetPasswordRequest;
 import com.sewa.dto.response.AuthResponse;
 
 public interface AuthService {
@@ -15,5 +16,7 @@ public interface AuthService {
 
     void forgotPassword(String email);
 
-    void resetPassword(String token, String newPassword);
+    void validateOtp(String email, String otp);
+
+    void resetPassword(ResetPasswordRequest request);
 }

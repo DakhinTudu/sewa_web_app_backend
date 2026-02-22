@@ -55,4 +55,9 @@
   a {
     @apply text-primary-600 hover:text-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 rounded;
   }
+  /* Headless UI portal (dropdowns, popovers) must sit above sticky table columns and modals */
+  #headlessui-portal-root {
+    z-index: 9999;
+    position: relative;
+  }
 }

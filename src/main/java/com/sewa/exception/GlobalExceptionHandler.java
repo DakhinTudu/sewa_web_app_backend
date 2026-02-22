@@ -29,7 +29,7 @@ public class GlobalExceptionHandler {
      * Generic message for auth failures - do not reveal whether username or
      * password was wrong
      */
-    private static final String INVALID_CREDENTIALS_MESSAGE = "Invalid username or password";
+    private static final String INVALID_CREDENTIALS_MESSAGE = "Invalid email/username or password";
 
     @ExceptionHandler(SewaException.class)
     public ResponseEntity<ApiResponse<Object>> handleSewaException(SewaException ex) {

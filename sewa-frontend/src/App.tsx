@@ -12,6 +12,7 @@ import OrganizationPage from './pages/public/OrganizationPage';
 import NoticesPage from './pages/public/NoticesPage';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
+import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 // Dashboard Pages
@@ -25,6 +26,8 @@ import CalendarPage from './pages/dashboard/CalendarPage';
 import MessagesPage from './pages/dashboard/MessagesPage';
 import PaymentsPage from './pages/dashboard/PaymentsPage';
 import AdminPage from './pages/dashboard/AdminPage';
+import CommunicationsPage from './pages/dashboard/CommunicationsPage';
+import NotificationsPage from './pages/dashboard/NotificationsPage';
 
 function App() {
     return (
@@ -40,6 +43,7 @@ function App() {
                         <Route path="/notices" element={<NoticesPage />} />
                         <Route path="/login" element={<LoginPage />} />
                         <Route path="/register" element={<RegisterPage />} />
+                        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                     </Route>
 
                     {/* Protected dashboard */}
@@ -54,6 +58,8 @@ function App() {
                             <Route path="/dashboard/calendar" element={<CalendarPage />} />
                             <Route path="/dashboard/messages" element={<MessagesPage />} />
                             <Route path="/dashboard/payments" element={<PaymentsPage />} />
+                            <Route path="/dashboard/communications" element={<CommunicationsPage />} />
+                            <Route path="/dashboard/notifications" element={<NotificationsPage />} />
                             <Route path="/dashboard/admin" element={<AdminPage />} />
                         </Route>
                     </Route>

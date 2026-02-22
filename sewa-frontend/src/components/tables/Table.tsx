@@ -4,7 +4,9 @@ import clsx from "clsx";
 interface Column<T> {
     header: string;
     accessor: keyof T | ((row: T) => ReactNode);
-    className?: string; // Additional classes for the cell
+    className?: string;
+    /** When true, column is sticky on the right so it stays visible when scrolling horizontally */
+    stickyRight?: boolean;
 }
 
 interface TableProps<T> {
@@ -36,6 +38,7 @@ export function Table<T>({ data, columns, keyExtractor, isLoading }: TableProps<
                                 scope="col"
                                 className={clsx(
                                     "px-3 py-3 sm:py-3.5 text-left text-xs sm:text-sm font-semibold text-gray-900",
+                                    (col as Column<T> & { stickyRight?: boolean }).stickyRight && "sticky right-0 z-10 bg-gray-50",
                                     col.className
                                 )}
                             >
@@ -59,6 +62,7 @@ export function Table<T>({ data, columns, keyExtractor, isLoading }: TableProps<
                                         key={index}
                                         className={clsx(
                                             "px-3 py-3 sm:py-4 text-sm text-gray-500",
+                                            (col as Column<T> & { stickyRight?: boolean }).stickyRight && "sticky right-0 z-10 bg-white",
                                             col.className
                                         )}
                                     >

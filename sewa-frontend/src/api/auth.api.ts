@@ -1,11 +1,18 @@
 import api from './axios';
 import type { ApiResponse, AuthResponse } from '../types/api.types';
 
-type LoginRequest = { username: string; password: string };
+type LoginRequest = { login?: string; username?: string; password: string };
 
 export const authApi = {
     login: async (data: LoginRequest): Promise<AuthResponse> => {
-        const response = await api.post<ApiResponse<AuthResponse>>('/auth/login', data);
+        const loginValue = String(data.login ?? data.username ?? '').trim();
+        const passwordValue = String(data.password ?? '').trim();
+        const body = {
+            login: loginValue,
+            username: loginValue,
+            password: passwordValue,
+        };
+        const response = await api.post<ApiResponse<AuthResponse>>('/auth/login', body);
         return response.data.data;
     },
 
@@ -28,13 +35,18 @@ export const authApi = {
         }
     },
 
-    forgotPassword: async (email: string): Promise<void> => {
-        await api.post<ApiResponse<void>>('/auth/forgot-password', null, { params: { email } });
+    forgotPassword: async (email: string): Promise<{ email: string }> => {
+        const response = await api.post<ApiResponse<{ email: string }>>('/auth/forgot-password', null, {
+            params: { email },
+        });
+        return response.data.data ?? { email };
     },
 
-    resetPassword: async (token: string, newPassword: string): Promise<void> => {
-        await api.post<ApiResponse<void>>('/auth/reset-password', null, {
-            params: { token, newPassword },
-        });
+    validateOtp: async (data: { email: string; otp: string }): Promise<void> => {
+        await api.post<ApiResponse<void>>('/auth/validate-otp', data);
+    },
+
+    resetPassword: async (data: { email: string; otp: string; newPassword: string }): Promise<void> => {
+        await api.post<ApiResponse<void>>('/auth/reset-password', data);
     },
 };

@@ -8,6 +8,7 @@ export interface AuthResponse {
     token: string;
     username: string;
     roles: string[];
+    permissions?: string[];
 }
 
 export interface ApiResponse<T> {
@@ -85,6 +86,7 @@ export interface MemberResponse {
     fullName: string;
     phone: string;
     address: string;
+    permanentAddress?: string;
     designation: string;
     membershipStatus: MembershipStatus;
     joinedDate: string; // LocalDate
@@ -99,6 +101,7 @@ export interface MemberResponse {
     workingSector?: string;
     createdAt: string; // LocalDateTime
     updatedAt: string; // LocalDateTime
+    representative?: boolean;
 }
 
 export interface StudentResponse {

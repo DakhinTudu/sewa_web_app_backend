@@ -61,30 +61,35 @@ public class DataLoader implements CommandLineRunner {
     }
 
     private void initializePermissions() {
-        if (permissionRepository.count() == 0) {
-            String[] commonPermissions = {
-                    "USER_LOGIN", "USER_REGISTER", "USER_PROFILE_VIEW", "USER_PROFILE_UPDATE",
-                    "MEMBER_CREATE", "MEMBER_VIEW", "MEMBER_UPDATE", "MEMBER_APPROVE", "MEMBER_REJECT", "MEMBER_DELETE",
-                    "MEMBER_LIST",
-                    "STUDENT_CREATE", "STUDENT_VIEW", "STUDENT_UPDATE", "STUDENT_APPROVE", "STUDENT_DELETE",
-                    "STUDENT_LIST",
-                    "CHAPTER_CREATE", "CHAPTER_VIEW", "CHAPTER_UPDATE", "CHAPTER_DELETE", "CHAPTER_ASSIGN_MEMBER",
-                    "CHAPTER_VIEW_MEMBERS",
-                    "FEE_VIEW", "FEE_PAY", "FEE_VERIFY", "FEE_RECEIPT_GENERATE", "FEE_REPORT",
-                    "CONTENT_CREATE", "CONTENT_VIEW", "CONTENT_UPDATE", "CONTENT_DELETE", "CONTENT_PUBLISH",
-                    "CONTENT_ARCHIVE",
-                    "AGM_CREATE", "AGM_VIEW", "AGM_UPDATE", "AGM_DELETE", "AGM_ATTENDANCE_MARK", "AGM_REPORT",
-                    "NEWS_CREATE", "NEWS_VIEW", "NEWS_UPDATE", "NEWS_DELETE",
-                    "REPORT_VIEW", "REPORT_EXPORT",
-                    "MESSAGE_SEND", "MESSAGE_VIEW", "MESSAGE_DELETE", "DOCUMENT_CIRCULATE",
-                    "SYSTEM_SETTINGS_VIEW", "SYSTEM_SETTINGS_UPDATE", "AUDIT_LOG_VIEW",
-                    "ROLE_CREATE", "ROLE_UPDATE", "ROLE_DELETE", "PERMISSION_ASSIGN", "USER_ROLE_ASSIGN"
-            };
-
-            for (String code : commonPermissions) {
+        String[] commonPermissions = {
+                "USER_LOGIN", "USER_REGISTER", "USER_PROFILE_VIEW", "USER_PROFILE_UPDATE",
+                "MEMBER_CREATE", "MEMBER_VIEW", "MEMBER_UPDATE", "MEMBER_APPROVE", "MEMBER_REJECT", "MEMBER_DELETE",
+                "MEMBER_LIST",
+                "STUDENT_CREATE", "STUDENT_VIEW", "STUDENT_UPDATE", "STUDENT_APPROVE", "STUDENT_DELETE",
+                "STUDENT_LIST",
+                "CHAPTER_CREATE", "CHAPTER_VIEW", "CHAPTER_UPDATE", "CHAPTER_DELETE", "CHAPTER_ASSIGN_MEMBER",
+                "CHAPTER_VIEW_MEMBERS",
+                "FEE_VIEW", "FEE_PAY", "FEE_VERIFY", "FEE_RECEIPT_GENERATE", "FEE_REPORT",
+                "CONTENT_CREATE", "CONTENT_VIEW", "CONTENT_UPDATE", "CONTENT_DELETE", "CONTENT_PUBLISH",
+                "CONTENT_ARCHIVE",
+                "AGM_CREATE", "AGM_VIEW", "AGM_UPDATE", "AGM_DELETE", "AGM_ATTENDANCE_MARK", "AGM_REPORT",
+                "NEWS_CREATE", "NEWS_VIEW", "NEWS_UPDATE", "NEWS_DELETE",
+                "REPORT_VIEW", "REPORT_EXPORT",
+                "MESSAGE_SEND", "MESSAGE_VIEW", "MESSAGE_DELETE", "DOCUMENT_CIRCULATE",
+                "COMMUNICATIONS_SEND",
+                "ANNOUNCEMENT_CREATE", "ANNOUNCEMENT_VIEW",
+                "SYSTEM_SETTINGS_VIEW", "SYSTEM_SETTINGS_UPDATE", "AUDIT_LOG_VIEW",
+                "ROLE_CREATE", "ROLE_UPDATE", "ROLE_DELETE", "PERMISSION_ASSIGN", "USER_ROLE_ASSIGN"
+        };
+        int created = 0;
+        for (String code : commonPermissions) {
+            if (permissionRepository.findByPermissionCode(code).isEmpty()) {
                 permissionRepository.save(Permission.builder().permissionCode(code).build());
+                created++;
             }
-            log.info("Permissions initialized: {} permissions created.", commonPermissions.length);
+        }
+        if (created > 0) {
+            log.info("Permissions initialized: {} new permission(s) created (e.g. COMMUNICATIONS_SEND, ANNOUNCEMENT_*).", created);
         }
     }
 
@@ -109,21 +114,25 @@ public class DataLoader implements CommandLineRunner {
                 "REPORT_VIEW", "REPORT_EXPORT",
                 "FEE_VIEW", "FEE_VERIFY", "FEE_REPORT",
                 "MESSAGE_SEND", "MESSAGE_VIEW", "MESSAGE_DELETE", "DOCUMENT_CIRCULATE",
+                "COMMUNICATIONS_SEND",
+                "ANNOUNCEMENT_CREATE", "ANNOUNCEMENT_VIEW",
                 "SYSTEM_SETTINGS_VIEW", "AUDIT_LOG_VIEW"));
 
         // CHAPTER_ADMIN mapping
         roleMappings.put("ROLE_CHAPTER_ADMIN", Arrays.asList(
                 "MEMBER_VIEW", "MEMBER_UPDATE", "CHAPTER_VIEW", "CHAPTER_ASSIGN_MEMBER", "CONTENT_VIEW",
+                "ANNOUNCEMENT_VIEW",
                 "MESSAGE_SEND", "MESSAGE_VIEW"));
 
         // MEMBER mapping
         roleMappings.put("ROLE_MEMBER", Arrays.asList(
                 "USER_PROFILE_VIEW", "USER_PROFILE_UPDATE", "CONTENT_VIEW", "AGM_VIEW", "FEE_VIEW", "FEE_PAY",
+                "ANNOUNCEMENT_VIEW",
                 "MESSAGE_SEND", "MESSAGE_VIEW"));
 
         // STUDENT mapping
         roleMappings.put("ROLE_STUDENT", Arrays.asList(
-                "USER_PROFILE_VIEW", "CONTENT_VIEW", "MESSAGE_VIEW"));
+                "USER_PROFILE_VIEW", "CONTENT_VIEW", "ANNOUNCEMENT_VIEW", "MESSAGE_VIEW"));
 
         for (Map.Entry<String, List<String>> entry : roleMappings.entrySet()) {
             Optional<Role> existingRole = roleRepository.findByRoleName(entry.getKey());

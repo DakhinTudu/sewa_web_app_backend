@@ -42,6 +42,41 @@ public interface MemberRepository extends JpaRepository<Member, Integer> {
         @Query(value = "SELECT m.* FROM members m " +
                         "LEFT JOIN educational_levels el ON el.id = m.educational_level_id " +
                         "LEFT JOIN working_sectors ws ON ws.id = m.working_sector_id " +
+                        "LEFT JOIN elected_representatives er ON er.member_id = m.member_id AND er.is_active = true " +
+                        "WHERE (:chapterId IS NULL OR m.chapter_id = :chapterId) " +
+                        "AND (:eduLevel IS NULL OR el.name = :eduLevel) " +
+                        "AND (:sector IS NULL OR ws.name = :sector) " +
+                        "AND (:status IS NULL OR m.membership_status = :status) " +
+                        "AND (:query IS NULL " +
+                        "  OR m.full_name ILIKE '%' || CAST(:query AS TEXT) || '%' " +
+                        "  OR m.membership_code ILIKE '%' || CAST(:query AS TEXT) || '%' " +
+                        "  OR m.phone ILIKE '%' || CAST(:query AS TEXT) || '%') " +
+                        "AND (m.is_deleted = FALSE OR m.is_deleted IS NULL) " +
+                        "ORDER BY (CASE WHEN er.rep_id IS NOT NULL THEN 0 ELSE 1 END), m.created_at DESC",
+                countQuery = "SELECT COUNT(*) FROM members m " +
+                        "LEFT JOIN educational_levels el ON el.id = m.educational_level_id " +
+                        "LEFT JOIN working_sectors ws ON ws.id = m.working_sector_id " +
+                        "WHERE (:chapterId IS NULL OR m.chapter_id = :chapterId) " +
+                        "AND (:eduLevel IS NULL OR el.name = :eduLevel) " +
+                        "AND (:sector IS NULL OR ws.name = :sector) " +
+                        "AND (:status IS NULL OR m.membership_status = :status) " +
+                        "AND (:query IS NULL " +
+                        "  OR m.full_name ILIKE '%' || CAST(:query AS TEXT) || '%' " +
+                        "  OR m.membership_code ILIKE '%' || CAST(:query AS TEXT) || '%' " +
+                        "  OR m.phone ILIKE '%' || CAST(:query AS TEXT) || '%') " +
+                        "AND (m.is_deleted = FALSE OR m.is_deleted IS NULL)",
+                nativeQuery = true)
+        Page<Member> searchMembersOrderByRepresentativeThenRecent(
+                        @Param("chapterId") Integer chapterId,
+                        @Param("eduLevel") String eduLevel,
+                        @Param("sector") String sector,
+                        @Param("status") String status,
+                        @Param("query") String query,
+                        Pageable pageable);
+
+        @Query(value = "SELECT m.* FROM members m " +
+                        "LEFT JOIN educational_levels el ON el.id = m.educational_level_id " +
+                        "LEFT JOIN working_sectors ws ON ws.id = m.working_sector_id " +
                         "WHERE (:chapterId IS NULL OR m.chapter_id = :chapterId) " +
                         "AND (:eduLevel IS NULL OR el.name = :eduLevel) " +
                         "AND (:sector IS NULL OR ws.name = :sector) " +
@@ -79,4 +114,20 @@ public interface MemberRepository extends JpaRepository<Member, Integer> {
 
         @Query("SELECT COUNT(m) FROM Member m WHERE m.chapter.id = :chapterId AND (m.isDeleted = false OR m.isDeleted IS NULL)")
         long countByChapterId(@Param("chapterId") Integer chapterId);
+
+        @Query("SELECT m FROM Member m JOIN m.user u WHERE (m.isDeleted = false OR m.isDeleted IS NULL) " +
+                "AND m.membershipStatus = com.sewa.entity.enums.MembershipStatus.ACTIVE " +
+                "AND u.email IS NOT NULL AND TRIM(u.email) != ''")
+        List<Member> findActiveMembersWithEmail();
+
+        @Query("SELECT m FROM Member m JOIN m.user u WHERE (m.isDeleted = false OR m.isDeleted IS NULL) " +
+                "AND m.membershipStatus = com.sewa.entity.enums.MembershipStatus.ACTIVE " +
+                "AND m.chapter.id IN :chapterIds " +
+                "AND u.email IS NOT NULL AND TRIM(u.email) != ''")
+        List<Member> findActiveMembersWithEmailByChapterIds(@Param("chapterIds") List<Integer> chapterIds);
+
+        @Query("SELECT m FROM Member m JOIN m.user u WHERE m.id IN :memberIds " +
+                "AND (m.isDeleted = false OR m.isDeleted IS NULL) " +
+                "AND u.email IS NOT NULL AND TRIM(u.email) != ''")
+        List<Member> findMembersWithEmailByIds(@Param("memberIds") List<Integer> memberIds);
 }

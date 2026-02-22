@@ -12,12 +12,15 @@ import { Modal } from '../../components/ui/Modal';
 import { Spinner } from '../../components/ui/Spinner';
 import { Table } from '../../components/tables/Table';
 import { useToast } from '../../components/ui/Toast';
-import { UserGroupIcon, Cog6ToothIcon, DocumentMagnifyingGlassIcon, UserCircleIcon, PencilSquareIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { UserGroupIcon, Cog6ToothIcon, DocumentMagnifyingGlassIcon, UserCircleIcon, PencilSquareIcon, PlusIcon, MegaphoneIcon } from '@heroicons/react/24/outline';
 import type { SystemSetting } from '../../types/api.types';
+import { useAuth } from '../../auth/AuthProvider';
+import { announcementsApi } from '../../api/announcements.api';
 
 export default function AdminPage() {
     const toast = useToast();
     const queryClient = useQueryClient();
+    const { user } = useAuth();
     const [editSetting, setEditSetting] = useState<SystemSetting | null>(null);
     const [settingValue, setSettingValue] = useState('');
     const [showAddRep, setShowAddRep] = useState(false);
@@ -25,6 +28,16 @@ export default function AdminPage() {
     const [repRoleName, setRepRoleName] = useState('');
     const [repTermStart, setRepTermStart] = useState('');
     const [repTermEnd, setRepTermEnd] = useState('');
+    const [showPostAnnouncement, setShowPostAnnouncement] = useState(false);
+    const [announcementTitle, setAnnouncementTitle] = useState('');
+    const [announcementContent, setAnnouncementContent] = useState('');
+
+    const canPostAnnouncements = user?.permissions?.includes('ANNOUNCEMENT_CREATE');
+    const { data: announcements = [], isLoading: announcementsLoading } = useQuery({
+        queryKey: ['announcements-list'],
+        queryFn: announcementsApi.list,
+        enabled: canPostAnnouncements,
+    });
 
     const { data: stats, isLoading: statsLoading } = useQuery({
         queryKey: ['admin', 'dashboard', 'stats'],
@@ -77,6 +90,22 @@ export default function AdminPage() {
         },
     });
 
+    const postAnnouncementMutation = useMutation({
+        mutationFn: (data: { title: string; content: string }) => announcementsApi.create(data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['announcements-list'] });
+            queryClient.invalidateQueries({ queryKey: ['announcements-unread-count'] });
+            setShowPostAnnouncement(false);
+            setAnnouncementTitle('');
+            setAnnouncementContent('');
+            toast.success('Announcement posted. All users will see it in the bell.');
+        },
+        onError: (err: unknown) => {
+            const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Failed to post announcement.';
+            toast.error(msg);
+        },
+    });
+
     const handleSaveSetting = () => {
         if (!editSetting) return;
         if (!settingValue.trim()) {
@@ -104,6 +133,14 @@ export default function AdminPage() {
     const openEditSetting = (s: SystemSetting) => {
         setEditSetting(s);
         setSettingValue(s.value);
+    };
+
+    const handlePostAnnouncement = () => {
+        if (!announcementTitle.trim() || !announcementContent.trim()) {
+            toast.error('Title and content are required.');
+            return;
+        }
+        postAnnouncementMutation.mutate({ title: announcementTitle.trim(), content: announcementContent.trim() });
     };
 
     return (
@@ -151,6 +188,37 @@ export default function AdminPage() {
                         </CardContent>
                     </Card>
                 </div>
+            )}
+
+            {canPostAnnouncements && (
+                <Card>
+                    <CardContent className="p-0">
+                        <div className="border-b border-secondary-200 px-4 py-3 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <MegaphoneIcon className="h-5 w-5 text-secondary-500" />
+                                <h2 className="font-semibold text-secondary-900">Announcements / Notifications</h2>
+                            </div>
+                            <Button variant="outline" size="sm" onClick={() => setShowPostAnnouncement(true)} leftIcon={<PlusIcon className="h-4 w-4" />}>
+                                Post announcement
+                            </Button>
+                        </div>
+                        {announcementsLoading ? (
+                            <div className="p-6 flex justify-center"><Spinner /></div>
+                        ) : announcements.length ? (
+                            <ul className="divide-y divide-secondary-200">
+                                {announcements.slice(0, 10).map((a) => (
+                                    <li key={a.id} className="px-4 py-3">
+                                        <p className="font-medium text-secondary-900">{a.title}</p>
+                                        <p className="text-sm text-secondary-600 mt-0.5 line-clamp-2">{a.content}</p>
+                                        <p className="text-xs text-secondary-500 mt-1">{a.createdByUsername} · {a.createdAt ? new Date(a.createdAt).toLocaleString() : ''}</p>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <div className="p-6 text-center text-secondary-500">No announcements yet. Post one to show in the bell for all users.</div>
+                        )}
+                    </CardContent>
+                </Card>
             )}
 
             <Card>
@@ -261,6 +329,27 @@ export default function AdminPage() {
                         </div>
                     </div>
                 )}
+            </Modal>
+
+            <Modal isOpen={showPostAnnouncement} onClose={() => setShowPostAnnouncement(false)} title="Post announcement">
+                <div className="space-y-4">
+                    <p className="text-sm text-secondary-600">This will appear in the bell for all logged-in users.</p>
+                    <Input label="Title" value={announcementTitle} onChange={(e) => setAnnouncementTitle(e.target.value)} placeholder="Announcement title" />
+                    <div>
+                        <label className="block text-sm font-medium text-secondary-700 mb-1">Content</label>
+                        <textarea
+                            className="block w-full rounded-md border border-secondary-300 px-3 py-2 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                            rows={4}
+                            value={announcementContent}
+                            onChange={(e) => setAnnouncementContent(e.target.value)}
+                            placeholder="Announcement content"
+                        />
+                    </div>
+                    <div className="flex justify-end gap-2">
+                        <Button variant="outline" onClick={() => setShowPostAnnouncement(false)}>Cancel</Button>
+                        <Button onClick={handlePostAnnouncement} isLoading={postAnnouncementMutation.isPending}>Post</Button>
+                    </div>
+                </div>
             </Modal>
 
             <Modal isOpen={showAddRep} onClose={() => setShowAddRep(false)} title="Add representative">
