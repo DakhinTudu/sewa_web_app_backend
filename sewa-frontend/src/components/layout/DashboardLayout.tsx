@@ -45,21 +45,9 @@ export default function DashboardLayout() {
     const navigate = useNavigate();
     const { user, logout } = useAuth();
 
-    const { data: announcements = [] } = useQuery({
-        queryKey: ['announcements-list'],
-        queryFn: announcementsApi.list,
-        enabled: !!user,
-        retry: false,
-    });
     const { data: announcementsUnread = 0 } = useQuery({
         queryKey: ['announcements-unread-count'],
         queryFn: announcementsApi.getUnreadCount,
-        enabled: !!user,
-        retry: false,
-    });
-    const { data: communicationsReceived = [] } = useQuery({
-        queryKey: ['communications-received'],
-        queryFn: communicationsApi.getReceivedByMe,
         enabled: !!user,
         retry: false,
     });

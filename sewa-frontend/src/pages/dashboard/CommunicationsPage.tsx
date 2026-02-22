@@ -47,7 +47,7 @@ export default function CommunicationsPage() {
     const queryClient = useQueryClient();
     const [baseType, setBaseType] = useState(BASE_ALL);
     const [chapterIds, setChapterIds] = useState<number[]>([]);
-    const [paymentFilter, setPaymentFilter] = useState(PAYMENT_UNPAID_CURRENT_YEAR);
+    const [paymentFilter] = useState(PAYMENT_UNPAID_CURRENT_YEAR);
     const [selectedMemberIds, setSelectedMemberIds] = useState<number[]>([]);
     const [memberSearchQuery, setMemberSearchQuery] = useState('');
     const [memberSearchChapterId, setMemberSearchChapterId] = useState<number | ''>('');
