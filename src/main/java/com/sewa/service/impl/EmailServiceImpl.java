@@ -48,9 +48,9 @@ public class EmailServiceImpl implements EmailService {
                     "Email is not configured. Set SEWA_MAIL_PASSWORD (Gmail App Password) in Render → Environment, then redeploy.");
         }
         if (fromEmail == null || fromEmail.isBlank()) {
-            log.error("Cannot send email: SEWA_MAIL_USERNAME (sewa.mail.from) is not set.");
+            log.error("Cannot send email: SEWA_MAIL_FROM or SEWA_MAIL_USERNAME (From address) is not set.");
             throw new SewaException(
-                    "Email is not configured. Set SEWA_MAIL_USERNAME in Render → Environment, then redeploy.");
+                    "Email is not configured. Set SEWA_MAIL_FROM (or SEWA_MAIL_USERNAME for Gmail) in Render → Environment, then redeploy.");
         }
     }
 
