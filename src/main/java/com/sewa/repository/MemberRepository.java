@@ -20,10 +20,10 @@ public interface MemberRepository extends JpaRepository<Member, Integer> {
         @Query("SELECT m.chapter.chapterName, COUNT(m) FROM Member m WHERE (m.isDeleted = false OR m.isDeleted IS NULL) AND m.chapter IS NOT NULL GROUP BY m.chapter.chapterName")
         List<Object[]> countMembersByChapter();
 
-        @Query("SELECT m.educationalLevel, COUNT(m) FROM Member m WHERE (m.isDeleted = false OR m.isDeleted IS NULL) GROUP BY m.educationalLevel")
+        @Query("SELECT COALESCE(m.educationalLevel.name, 'Not set'), COUNT(m) FROM Member m WHERE (m.isDeleted = false OR m.isDeleted IS NULL) GROUP BY COALESCE(m.educationalLevel.name, 'Not set')")
         List<Object[]> countMembersByEducationalLevel();
 
-        @Query("SELECT m.workingSector, COUNT(m) FROM Member m WHERE (m.isDeleted = false OR m.isDeleted IS NULL) GROUP BY m.workingSector")
+        @Query("SELECT COALESCE(m.workingSector.name, 'Not set'), COUNT(m) FROM Member m WHERE (m.isDeleted = false OR m.isDeleted IS NULL) GROUP BY COALESCE(m.workingSector.name, 'Not set')")
         List<Object[]> countMembersByWorkingSector();
 
         @Query("SELECT cm.member FROM ChapterMember cm WHERE cm.chapter.id = :chapterId")

@@ -17,7 +17,7 @@ public interface StudentRepository extends JpaRepository<Student, Integer> {
     @Query("SELECT s.chapter.chapterName, COUNT(s) FROM Student s GROUP BY s.chapter.chapterName")
     List<Object[]> countStudentsByChapter();
 
-    @Query("SELECT s.educationalLevel, COUNT(s) FROM Student s GROUP BY s.educationalLevel")
+    @Query("SELECT COALESCE(s.educationalLevel.name, 'Not set'), COUNT(s) FROM Student s GROUP BY COALESCE(s.educationalLevel.name, 'Not set')")
     List<Object[]> countStudentsByEducationalLevel();
 
     org.springframework.data.domain.Page<Student> findByStatus(com.sewa.entity.enums.MembershipStatus status,
