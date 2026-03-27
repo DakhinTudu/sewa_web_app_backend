@@ -34,4 +34,8 @@ export const announcementsApi = {
     markAsRead: async (id: number): Promise<void> => {
         await api.patch<ApiResponse<void>>(`/announcements/${id}/read`);
     },
+
+    markAllAsRead: async (): Promise<void> => {
+        await api.patch<ApiResponse<void>>('/announcements/read-all');
+    },
 };

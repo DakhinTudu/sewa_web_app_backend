@@ -58,4 +58,12 @@ public class AnnouncementController {
         announcementService.markAsRead(id, principal.getName());
         return ResponseEntity.ok(ApiResponseBuilder.success(null, "Marked as read"));
     }
+
+    @PatchMapping("/read-all")
+    @PreAuthorize("hasAuthority('ANNOUNCEMENT_VIEW') or hasRole('SUPER_ADMIN') or hasRole('ADMIN')")
+    @Operation(summary = "Mark all as read", description = "Mark all visible announcements as read for the current user")
+    public ResponseEntity<ApiResponse<Void>> markAllAsRead(Principal principal) {
+        announcementService.markAllAsRead(principal.getName());
+        return ResponseEntity.ok(ApiResponseBuilder.success(null, "All announcements marked as read"));
+    }
 }

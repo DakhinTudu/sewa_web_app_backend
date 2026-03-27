@@ -67,7 +67,31 @@ export default function DashboardLayout() {
     const pendingCount = pendingMembersPage?.totalElements ?? 0;
     const totalUnreadCount = announcementsUnread + communicationsReceivedUnread + pendingCount;
 
-    const navigation = baseNavigation;
+    const hasRole = (role: string) => !!user?.roles?.includes(role);
+    const hasPermission = (permission: string) => !!user?.permissions?.includes(permission);
+    const hasRoleOrPermission = (permission: string) =>
+        hasPermission(permission) || hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPER_ADMIN');
+
+    const navigation = baseNavigation.filter((item) => {
+        switch (item.name) {
+            case 'Membership':
+                return hasRoleOrPermission('MEMBER_LIST');
+            case 'Students':
+                return hasRoleOrPermission('STUDENT_LIST');
+            case 'Contents':
+                return hasRoleOrPermission('CONTENT_CREATE') || hasRoleOrPermission('CONTENT_UPDATE') || hasRoleOrPermission('CONTENT_DELETE');
+            case 'Messages':
+                return hasRoleOrPermission('MESSAGE_VIEW');
+            case 'Payments':
+                return hasRoleOrPermission('FEE_VIEW') || hasRoleOrPermission('FEE_PAY');
+            case 'Communications':
+                return hasRoleOrPermission('COMMUNICATIONS_SEND');
+            case 'Admin':
+                return hasRole('ROLE_ADMIN') || hasRole('ROLE_SUPER_ADMIN');
+            default:
+                return true;
+        }
+    });
 
     const handleLogout = () => {
         logout();

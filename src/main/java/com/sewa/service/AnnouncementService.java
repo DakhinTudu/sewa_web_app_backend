@@ -14,4 +14,6 @@ public interface AnnouncementService {
     void create(AnnouncementRequest request, String username);
 
     void markAsRead(Integer announcementId, String username);
+
+    void markAllAsRead(String username);
 }

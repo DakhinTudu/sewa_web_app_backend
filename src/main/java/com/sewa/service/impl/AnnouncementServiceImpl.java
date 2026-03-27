@@ -78,6 +78,27 @@ public class AnnouncementServiceImpl implements AnnouncementService {
         readRepository.save(read);
     }
 
+    @Override
+    @Transactional
+    public void markAllAsRead(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new SewaException("User not found"));
+        Set<Integer> readSet = readRepository.findReadAnnouncementIdsByUserId(user.getId()).stream()
+                .collect(Collectors.toSet());
+        List<Announcement> announcements = announcementRepository.findTop50ByOrderByCreatedAtDesc();
+        List<UserAnnouncementRead> newReads = announcements.stream()
+                .filter(a -> !readSet.contains(a.getId()))
+                .map(a -> UserAnnouncementRead.builder()
+                        .userId(user.getId())
+                        .announcementId(a.getId())
+                        .readAt(LocalDateTime.now())
+                        .build())
+                .toList();
+        if (!newReads.isEmpty()) {
+            readRepository.saveAll(newReads);
+        }
+    }
+
     private AnnouncementResponse toResponse(Announcement a, boolean read) {
         String authorName = userRepository.findById(a.getCreatedByUserId())
                 .map(User::getUsername)

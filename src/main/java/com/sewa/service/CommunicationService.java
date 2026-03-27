@@ -21,4 +21,6 @@ public interface CommunicationService {
     int getCommunicationsReceivedUnreadCount(String username);
 
     void markCommunicationReceivedAsRead(Integer recipientId, String username);
+
+    void markAllCommunicationsReceivedAsRead(String username);
 }

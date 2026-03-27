@@ -71,4 +71,8 @@ export const communicationsApi = {
     markReceivedAsRead: async (recipientId: number): Promise<void> => {
         await api.patch<ApiResponse<void>>(`/communications/received-by-me/${recipientId}/read`);
     },
+
+    markAllReceivedAsRead: async (): Promise<void> => {
+        await api.patch<ApiResponse<void>>('/communications/received-by-me/read-all');
+    },
 };

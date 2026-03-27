@@ -65,6 +65,20 @@ export default function NotificationsPage() {
             queryClient.invalidateQueries({ queryKey: ['members'] });
         },
     });
+    const markAllReadMutation = useMutation({
+        mutationFn: async () => {
+            await Promise.all([
+                announcementsApi.markAllAsRead(),
+                communicationsApi.markAllReceivedAsRead(),
+            ]);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['announcements-list'] });
+            queryClient.invalidateQueries({ queryKey: ['announcements-unread-count'] });
+            queryClient.invalidateQueries({ queryKey: ['communications-received'] });
+            queryClient.invalidateQueries({ queryKey: ['communications-received-unread-count'] });
+        },
+    });
 
     const hasAny =
         announcements.length > 0 ||
@@ -83,10 +97,22 @@ export default function NotificationsPage() {
                 Back
             </button>
             <div className="mb-8">
-                <h1 className="text-2xl font-bold text-gray-900">Notifications</h1>
-                <p className="mt-1 text-sm text-gray-500">
-                    Announcements, messages and pending approvals
-                </p>
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                        <h1 className="text-2xl font-bold text-gray-900">Notifications</h1>
+                        <p className="mt-1 text-sm text-gray-500">
+                            Announcements, messages and pending approvals
+                        </p>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => markAllReadMutation.mutate()}
+                        disabled={markAllReadMutation.isPending}
+                        className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                    >
+                        {markAllReadMutation.isPending ? 'Marking...' : 'Mark all as read'}
+                    </button>
+                </div>
             </div>
 
             {!hasAny ? (

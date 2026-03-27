@@ -153,6 +153,14 @@ public class CommunicationServiceImpl implements CommunicationService {
         }
     }
 
+    @Override
+    @Transactional
+    public void markAllCommunicationsReceivedAsRead(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new SewaException("User not found"));
+        communicationRecipientRepository.markAllAsReadByUserId(user.getId());
+    }
+
     private CommunicationReceivedResponse toReceivedResponse(CommunicationRecipient rec) {
         CommunicationLog log = rec.getCommunicationLog();
         return CommunicationReceivedResponse.builder()

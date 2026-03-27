@@ -77,4 +77,12 @@ public class CommunicationController {
         communicationService.markCommunicationReceivedAsRead(recipientId, principal.getName());
         return ResponseEntity.ok(ApiResponseBuilder.success(null, "Marked as read"));
     }
+
+    @PatchMapping("/received-by-me/read-all")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(summary = "Mark all received communications as read")
+    public ResponseEntity<ApiResponse<Void>> markAllReceivedAsRead(Principal principal) {
+        communicationService.markAllCommunicationsReceivedAsRead(principal.getName());
+        return ResponseEntity.ok(ApiResponseBuilder.success(null, "All communications marked as read"));
+    }
 }
