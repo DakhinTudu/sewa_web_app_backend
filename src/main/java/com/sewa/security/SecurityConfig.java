@@ -44,6 +44,7 @@ public class SecurityConfig {
                                 "/api/v1/auth/**",
                                 "/api/v1/dropdowns/**",
                                 "/api/v1/master/**",
+                                "/api/v1/contact/**",
                                 "/api/v1/chapters/**",
                                 "/api/v1/representatives/**",
                                 "/v3/api-docs/**",

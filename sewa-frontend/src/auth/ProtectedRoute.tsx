@@ -1,5 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from './AuthProvider';
+import { Spinner } from '../components/ui/Spinner';
 
 interface ProtectedRouteProps {
     requiredPermission?: string;
@@ -10,7 +11,11 @@ export default function ProtectedRoute({ requiredPermission }: ProtectedRoutePro
     const location = useLocation();
 
     if (isLoading) {
-        return <div>Loading...</div>; // Replace with proper loading spinner
+        return (
+            <div className="flex min-h-[60vh] items-center justify-center">
+                <Spinner size="lg" />
+            </div>
+        );
     }
 
     if (!isAuthenticated) {

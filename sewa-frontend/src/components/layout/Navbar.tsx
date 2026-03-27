@@ -6,7 +6,7 @@ import { Button } from '../ui/Button';
 import { useAuth } from '../../auth/AuthProvider';
 import { Logo } from '../Logo';
 
-const navigation = (isAuthenticated: boolean) => [
+const navigation = () => [
     { name: 'Home', href: '/' },
     { name: 'About', href: '/about' },
     { name: 'Organization', href: '/organization' },
@@ -32,7 +32,7 @@ export default function Navbar() {
                             <div className="flex items-center min-w-0">
                                 <Logo variant="full" />
                                 <div className="hidden lg:ml-10 lg:flex lg:space-x-8 items-center h-full">
-                                    {navigation(isAuthenticated).map((item) => (
+                                    {navigation().map((item) => (
                                         <Link
                                             key={item.name}
                                             to={item.href}
@@ -82,7 +82,7 @@ export default function Navbar() {
                     </div>
                     <DisclosurePanel className="lg:hidden">
                         <div className="space-y-1 pb-3 pt-2">
-                            {navigation(isAuthenticated).map((item) => (
+                            {navigation().map((item) => (
                                 <DisclosureButton
                                     key={item.name}
                                     as={Link}

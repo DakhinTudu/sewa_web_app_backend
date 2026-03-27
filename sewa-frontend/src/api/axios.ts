@@ -2,7 +2,11 @@ import axios from 'axios';
 import { API_BASE_URL } from '../config/api';
 
 const baseURL = API_BASE_URL;
-console.log(`🔧 API Base URL: ${baseURL}`);
+const isDev = import.meta.env.DEV;
+
+if (isDev) {
+    console.log(`🔧 API Base URL: ${baseURL}`);
+}
 
 // Create axios instance with base URL
 const api = axios.create({
@@ -13,18 +17,21 @@ const api = axios.create({
     withCredentials: false, // Set to true if using cookies for auth
 });
 
-// Log all requests for debugging
 api.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token');
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
-        console.log(`🔵 API Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
+        if (isDev) {
+            console.log(`🔵 API Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
+        }
         return config;
     },
     (error) => {
-        console.error('❌ Request Error:', error);
+        if (isDev) {
+            console.error('❌ Request Error:', error);
+        }
         return Promise.reject(error);
     }
 );
@@ -32,19 +39,24 @@ api.interceptors.request.use(
 // Response interceptor for handling errors (e.g., 401 Unauthorized)
 api.interceptors.response.use(
     (response) => {
-        console.log(`🟢 API Response: ${response.status} ${response.config.url}`);
+        if (isDev) {
+            console.log(`🟢 API Response: ${response.status} ${response.config.url}`);
+        }
         return response;
     },
     (error) => {
         const status = error.response?.status;
         const message = error.response?.data?.message || error.message || 'Something went wrong';
 
-        console.error(`🔴 API Error (${status}): ${message}`);
-        console.error('Full Error:', error);
+        if (isDev) {
+            console.error(`🔴 API Error (${status}): ${message}`);
+            console.error('Full Error:', error);
+        }
 
         if (status === 401) {
             const isLoginRequest = error.config?.url?.includes('/auth/login');
-            if (!isLoginRequest) {
+            const isPublicContactRequest = error.config?.url?.includes('/contact');
+            if (!isLoginRequest && !isPublicContactRequest) {
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
                 if (!window.location.pathname.includes('/login')) {

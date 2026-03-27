@@ -1,24 +1,10 @@
 import { Link } from 'react-router-dom';
-import { ArrowRightIcon, UserGroupIcon, CalendarIcon, DocumentTextIcon, MapPinIcon, BellIcon } from '@heroicons/react/24/outline';
+import { ArrowRightIcon, UserGroupIcon, CalendarIcon, DocumentTextIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import { Button } from '../../components/ui/Button';
-import { useQuery } from '@tanstack/react-query';
-import { noticeApi } from '../../api/notice.api';
 import { PLACEHOLDER_NEWS } from '../../constants/placeholders';
 
 export default function LandingPage() {
-    const { data: notices, isLoading: noticesLoading } = useQuery({
-        queryKey: ['notices'],
-        queryFn: () => noticeApi.getAll()
-    });
-
-    const displayNotices = (notices && notices.length > 0)
-        ? notices.slice(0, 3).map(n => ({
-            title: n.title,
-            description: n.content?.slice(0, 120) || 'New announcement from SEWA.',
-            date: new Date(n.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }),
-            link: '/notices'
-        }))
-        : latestNewsFallback;
+    const displayNotices = latestNewsFallback;
 
     return (
         <div className="bg-white">
@@ -45,17 +31,10 @@ export default function LandingPage() {
                         </div>
 
                         <div className="mb-8 inline-flex items-center gap-2 rounded-full bg-white/80 backdrop-blur-sm px-4 py-2 shadow-md ring-1 ring-primary-900/10 transition-all hover:bg-white hover:shadow-lg">
-                            {notices && notices.length > 0 ? (
-                                <>
-                                    <BellIcon className="h-5 w-5 text-primary-600 animate-bounce" />
-                                    <span className="text-sm font-bold text-gray-900">Latest: {notices[0].title}</span>
-                                </>
-                            ) : (
-                                <>
-                                    <CalendarIcon className="h-5 w-5 text-primary-600" />
-                                    <span className="text-sm font-bold text-gray-900">Annual General Meeting 2026 - Coming Soon</span>
-                                </>
-                            )}
+                            <>
+                                <CalendarIcon className="h-5 w-5 text-primary-600" />
+                                <span className="text-sm font-bold text-gray-900">Annual General Meeting 2026 - Coming Soon</span>
+                            </>
                         </div>
 
                         <h1 className="text-5xl font-extrabold tracking-tight text-gray-900 sm:text-7xl">
@@ -133,33 +112,27 @@ export default function LandingPage() {
                     <h2 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">Latest Updates</h2>
                     <p className="mt-4 text-lg text-gray-600">Stay informed about our recent activities and upcoming events</p>
                 </div>
-                {noticesLoading ? (
-                    <div className="flex justify-center py-12">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-                        {displayNotices.map((news, idx) => (
-                            <div key={idx} className="group relative overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-gray-900/5 transition-all hover:shadow-2xl hover:-translate-y-1">
-                                <div className="aspect-[16/9] w-full overflow-hidden bg-gray-100">
-                                    <img src={PLACEHOLDER_NEWS} alt="" className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
-                                </div>
-                                <div className="p-6">
-                                    <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
-                                        <CalendarIcon className="h-4 w-4 flex-shrink-0" />
-                                        {news.date}
-                                    </div>
-                                    <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-primary-600 transition-colors line-clamp-2">{news.title}</h3>
-                                    <p className="text-sm text-gray-600 mb-4 leading-relaxed line-clamp-3">{news.description}</p>
-                                    <Link to={news.link} className="inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-700 group-hover:gap-2 transition-all min-h-[44px] items-center">
-                                        Read more
-                                        <ArrowRightIcon className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                                    </Link>
-                                </div>
+                <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+                    {displayNotices.map((news, idx) => (
+                        <div key={idx} className="group relative overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-gray-900/5 transition-all hover:shadow-2xl hover:-translate-y-1">
+                            <div className="aspect-[16/9] w-full overflow-hidden bg-gray-100">
+                                <img src={PLACEHOLDER_NEWS} alt="" className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
                             </div>
-                        ))}
-                    </div>
-                )}
+                            <div className="p-6">
+                                <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
+                                    <CalendarIcon className="h-4 w-4 flex-shrink-0" />
+                                    {news.date}
+                                </div>
+                                <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-primary-600 transition-colors line-clamp-2">{news.title}</h3>
+                                <p className="text-sm text-gray-600 mb-4 leading-relaxed line-clamp-3">{news.description}</p>
+                                <Link to={news.link} className="inline-flex items-center text-sm font-medium text-primary-600 hover:text-primary-700 group-hover:gap-2 transition-all min-h-[44px] items-center">
+                                    Read more
+                                    <ArrowRightIcon className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                                </Link>
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
 
             {/* CTA */}
@@ -187,7 +160,7 @@ const highlights = [
 ];
 
 const latestNewsFallback = [
-    { title: 'Annual General Meeting 2026', description: 'Join us for our upcoming AGM to discuss future initiatives.', date: 'March 15, 2026', link: '/calendar' },
-    { title: 'New Chapter in Maharashtra', description: 'We are exciting to announce our newest state chapter.', date: 'February 1, 2026', link: '/chapters' },
-    { title: 'Technical Workshop Series', description: 'Register for our upcoming workshop series.', date: 'January 20, 2026', link: '/calendar' },
+    { title: 'Annual General Meeting 2026', description: 'Join us for our upcoming AGM to discuss future initiatives.', date: 'March 15, 2026', link: '/about' },
+    { title: 'New Chapter in Maharashtra', description: 'We are exciting to announce our newest state chapter.', date: 'February 1, 2026', link: '/organization' },
+    { title: 'Technical Workshop Series', description: 'Register for our upcoming workshop series.', date: 'January 20, 2026', link: '/contact' },
 ];

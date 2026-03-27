@@ -32,9 +32,9 @@ export default function Footer() {
                     <div className="col-span-1">
                         <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase mb-4">Resources</h3>
                         <ul className="space-y-3">
-                            <li><Link to="/calendar" className="text-sm text-gray-600 hover:text-primary-600">Calendar</Link></li>
-                            <li><Link to="/news" className="text-sm text-gray-600 hover:text-primary-600">News & Events</Link></li>
-                            <li><a href="#" className="text-sm text-gray-600 hover:text-primary-600">Constitution (PDF)</a></li>
+                            <li><Link to="/organization" className="text-sm text-gray-600 hover:text-primary-600">Chapters</Link></li>
+                            <li><Link to="/about" className="text-sm text-gray-600 hover:text-primary-600">News & Events</Link></li>
+                            <li><Link to="/about" className="text-sm text-gray-600 hover:text-primary-600">Constitution (PDF)</Link></li>
                             <li><Link to="/login" className="text-sm text-gray-600 hover:text-primary-600">Member Login</Link></li>
                         </ul>
                     </div>

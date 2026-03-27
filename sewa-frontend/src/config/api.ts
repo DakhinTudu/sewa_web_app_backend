@@ -1,3 +1,3 @@
-// Comment/uncomment as needed: local dev vs production (Netlify + Render).
- export const API_BASE_URL = 'http://localhost:8080/api/v1';
-// export const API_BASE_URL = 'https://sewa-web-app-backend-6.onrender.com/api/v1';
+const fallbackApiBaseUrl = 'http://localhost:8080/api/v1';
+
+export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? fallbackApiBaseUrl;

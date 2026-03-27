@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { Card, CardContent } from '../../components/ui/Card';
 import { DocumentTextIcon } from '@heroicons/react/24/outline';
 
@@ -88,13 +89,16 @@ export default function AboutPage() {
                                         membership criteria, and operational guidelines.
                                     </p>
                                     <div className="space-y-2 text-sm text-gray-600">
-                                        <p><strong>Registration Number:</strong> [To be added]</p>
+                                        <p><strong>Registration Number:</strong> Available on official request</p>
                                         <p><strong>Registered Under:</strong> Societies Registration Act</p>
-                                        <p><strong>Registration Date:</strong> [To be added]</p>
+                                        <p><strong>Registration Date:</strong> Available on official request</p>
                                     </div>
-                                    <button className="mt-6 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
-                                        Download Constitution (PDF)
-                                    </button>
+                                    <Link
+                                        to="/contact"
+                                        className="mt-6 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                                    >
+                                        Request Constitution Copy
+                                    </Link>
                                 </div>
                             </div>
                         </CardContent>

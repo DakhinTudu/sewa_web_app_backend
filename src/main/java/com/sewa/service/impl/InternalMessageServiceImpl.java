@@ -1,9 +1,12 @@
 package com.sewa.service.impl;
 
 import com.sewa.dto.request.MessageRequest;
+import com.sewa.dto.request.PublicContactRequest;
 import com.sewa.dto.response.MessageResponse;
 import com.sewa.entity.InternalMessage;
 import com.sewa.entity.User;
+import com.sewa.entity.enums.Priority;
+import com.sewa.entity.enums.Visibility;
 import com.sewa.exception.SewaException;
 import com.sewa.repository.InternalMessageRepository;
 import com.sewa.repository.UserRepository;
@@ -42,6 +45,24 @@ public class InternalMessageServiceImpl implements InternalMessageService {
                 .priority(messageRequest.getPriority())
                 .visibility(messageRequest.getVisibility())
                 .expiresAt(messageRequest.getExpiresAt())
+                .build();
+
+        return mapToResponse(messageRepository.save(message));
+    }
+
+    @Override
+    @Transactional
+    public MessageResponse submitPublicContact(PublicContactRequest request) {
+        String normalizedSubject = "[Contact] " + request.getSubject().trim();
+        String normalizedContent = "From: " + request.getName().trim() + " <" + request.getEmail().trim() + ">\n\n"
+                + request.getMessage().trim();
+
+        InternalMessage message = InternalMessage.builder()
+                .sender(null)
+                .subject(normalizedSubject)
+                .content(normalizedContent)
+                .priority(Priority.NORMAL)
+                .visibility(Visibility.PRIVATE)
                 .build();
 
         return mapToResponse(messageRepository.save(message));

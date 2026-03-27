@@ -7,7 +7,7 @@ import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
 import { useToast } from '../../components/ui/Toast';
 import { EnvelopeIcon, PhoneIcon, MapPinIcon } from '@heroicons/react/24/outline';
-import { messagingApi } from '../../api/messaging.api';
+import { contactApi } from '../../api/contact.api';
 
 const ContactSchema = z.object({
     name: z.string().min(1, 'Name is required'),
@@ -34,13 +34,7 @@ export default function ContactPage() {
     const onSubmit = async (data: ContactFormValues) => {
         setIsSubmitting(true);
         try {
-            // Send message to admin account (assuming 'admin' is the default recipient)
-            await messagingApi.send({
-                subject: data.subject,
-                content: `From: ${data.name} (${data.email})\n\n${data.message}`,
-                recipientUsername: 'admin',
-                priority: 'NORMAL'
-            });
+            await contactApi.send(data);
             toast.success('Message sent successfully! We will get back to you soon.');
             reset();
         } catch (error) {
