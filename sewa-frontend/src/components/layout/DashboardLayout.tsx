@@ -121,9 +121,8 @@ export default function DashboardLayout() {
 
                                     {/* Mobile Sidebar Component */}
                                     <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-4">
-                                        <div className="flex h-16 shrink-0 items-center gap-2">
-                                            <Logo variant="full" linkTo="/dashboard" className="h-9 w-9" />
-                                            <span className="text-lg font-bold text-primary-600">Portal</span>
+                                        <div className="flex h-16 shrink-0 items-center">
+                                            <Logo variant="full" linkTo="/dashboard" />
                                         </div>
                                         <nav className="flex flex-1 flex-col">
                                             <ul role="list" className="flex flex-1 flex-col gap-y-7">
@@ -166,9 +165,8 @@ export default function DashboardLayout() {
                 {/* Static sidebar for desktop */}
                 <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
                     <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6 pb-4">
-                        <div className="flex h-16 shrink-0 items-center gap-2">
-                            <Logo variant="full" linkTo="/dashboard" className="h-9 w-9" />
-                            <span className="text-lg font-bold text-primary-600 tracking-tight">Portal</span>
+                        <div className="flex h-16 shrink-0 items-center">
+                            <Logo variant="full" linkTo="/dashboard" />
                         </div>
                         <nav className="flex flex-1 flex-col">
                             <ul role="list" className="flex flex-1 flex-col gap-y-7">

@@ -9,7 +9,6 @@ import LandingPage from './pages/public/LandingPage';
 import AboutPage from './pages/public/AboutPage';
 import ContactPage from './pages/public/ContactPage';
 import OrganizationPage from './pages/public/OrganizationPage';
-import NoticesPage from './pages/public/NoticesPage';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
@@ -40,7 +39,6 @@ function App() {
                         <Route path="/about" element={<AboutPage />} />
                         <Route path="/organization" element={<OrganizationPage />} />
                         <Route path="/contact" element={<ContactPage />} />
-                        <Route path="/notices" element={<NoticesPage />} />
                         <Route path="/login" element={<LoginPage />} />
                         <Route path="/register" element={<RegisterPage />} />
                         <Route path="/forgot-password" element={<ForgotPasswordPage />} />

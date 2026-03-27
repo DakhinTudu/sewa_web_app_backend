@@ -1,6 +1,11 @@
 import api from './axios';
 import type { ApiResponse, MemberResponse, Page } from '../types/api.types';
 
+/** Optional request config: pass signal to cancel in-flight request when a new search is triggered. */
+export interface MembersRequestConfig {
+    signal?: AbortSignal;
+}
+
 export const membersApi = {
     getSelf: async (): Promise<MemberResponse> => {
         const response = await api.get<ApiResponse<MemberResponse>>('/members/self');
@@ -12,6 +17,10 @@ export const membersApi = {
         return response.data.data;
     },
 
+    /**
+     * Paginated members list with optional filters. Pass signal (e.g. from React Query) to cancel
+     * previous request when search/filters change. Pagination: page=0&size=15 unchanged.
+     */
     getAllMembers: async (
         page = 0,
         size = 10,
@@ -21,10 +30,12 @@ export const membersApi = {
             educationalLevel?: string;
             workingSector?: string;
             status?: string;
-        }
+        },
+        config?: MembersRequestConfig
     ): Promise<Page<MemberResponse>> => {
         const response = await api.get<ApiResponse<Page<MemberResponse>>>('/members', {
             params: { page, size, ...filters },
+            signal: config?.signal,
         });
         return response.data.data;
     },

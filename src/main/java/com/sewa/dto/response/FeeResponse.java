@@ -26,6 +26,9 @@ public class FeeResponse {
     /** Alias for frontend: same as status */
     private PaymentStatus paymentStatus;
     private String remarks;
+    private String paymentMethod;
+    private String screenshotUrl;
+    private String rejectionReason;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

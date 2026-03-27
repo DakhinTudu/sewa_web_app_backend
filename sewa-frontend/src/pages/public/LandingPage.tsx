@@ -36,26 +36,34 @@ export default function LandingPage() {
 
                 <div className="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8">
                     <div className="mx-auto max-w-2xl text-center">
-                        <div className="mb-8 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 shadow-lg ring-1 ring-primary-900/10">
+                        <div className="flex justify-center mb-10">
+                            <img 
+                                src="https://raw.githubusercontent.com/DakhinTudu/sewa-assets/main/sewa-logo.png" 
+                                alt="SEWA Logo" 
+                                className="h-28 sm:h-36 w-auto object-contain drop-shadow-2xl animate-fade-in transition-transform hover:scale-105 duration-500" 
+                            />
+                        </div>
+
+                        <div className="mb-8 inline-flex items-center gap-2 rounded-full bg-white/80 backdrop-blur-sm px-4 py-2 shadow-md ring-1 ring-primary-900/10 transition-all hover:bg-white hover:shadow-lg">
                             {notices && notices.length > 0 ? (
                                 <>
                                     <BellIcon className="h-5 w-5 text-primary-600 animate-bounce" />
-                                    <span className="text-sm font-semibold text-primary-900">Latest: {notices[0].title}</span>
+                                    <span className="text-sm font-bold text-gray-900">Latest: {notices[0].title}</span>
                                 </>
                             ) : (
                                 <>
                                     <CalendarIcon className="h-5 w-5 text-primary-600" />
-                                    <span className="text-sm font-semibold text-primary-900">Annual General Meeting 2026 - Coming Soon</span>
+                                    <span className="text-sm font-bold text-gray-900">Annual General Meeting 2026 - Coming Soon</span>
                                 </>
                             )}
                         </div>
 
-                        <h1 className="text-5xl font-bold tracking-tight text-gray-900 sm:text-6xl lg:text-7xl">
+                        <h1 className="text-5xl font-extrabold tracking-tight text-gray-900 sm:text-7xl">
                             Santal Engineers
-                            <span className="block text-primary-600 mt-2">Welfare Association</span>
+                            <span className="block bg-gradient-to-r from-primary-600 to-teal-600 bg-clip-text text-transparent mt-3">Welfare Association</span>
                         </h1>
 
-                        <p className="mt-6 text-lg leading-8 text-gray-600 max-w-xl mx-auto">
+                        <p className="mt-8 text-lg leading-8 text-gray-600 max-w-xl mx-auto font-medium">
                             Empowering the Santal engineering community through professional development, social welfare, and collective growth. Building bridges between tradition and technology.
                         </p>
 

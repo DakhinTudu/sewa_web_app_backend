@@ -14,8 +14,10 @@ public interface MembershipFeeRepository extends JpaRepository<MembershipFee, In
         List<MembershipFee> findByMemberMembershipCode(String membershipCode);
 
         @org.springframework.data.jpa.repository.Query("SELECT f FROM MembershipFee f WHERE " +
-                        "(:query IS NULL OR f.member.fullName ILIKE %:query% OR f.member.membershipCode ILIKE %:query% OR f.transactionId ILIKE %:query%) "
-                        +
+                        "(:query IS NULL OR :query = '' " +
+                        "OR LOWER(f.member.fullName) LIKE LOWER(CONCAT(:query, '%')) " +
+                        "OR LOWER(f.member.membershipCode) LIKE LOWER(CONCAT(:query, '%')) " +
+                        "OR LOWER(f.transactionId) LIKE LOWER(CONCAT(:query, '%'))) " +
                         "AND (:status IS NULL OR f.paymentStatus = :status) " +
                         "AND (:year IS NULL OR f.financialYear = :year) " +
                         "AND (f.isDeleted = false OR f.isDeleted IS NULL)")

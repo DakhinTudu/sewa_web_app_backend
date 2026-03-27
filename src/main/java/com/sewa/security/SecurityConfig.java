@@ -43,16 +43,13 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/v1/auth/**",
                                 "/api/v1/dropdowns/**",
-                                "/api/v1/notices",
                                 "/api/v1/master/**",
+                                "/api/v1/chapters/**",
+                                "/api/v1/representatives/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html")
                         .permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/chapters/**").permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/representatives/**")
-                        .permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/contents/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -21,5 +21,11 @@ public interface FeeService {
 
     FeeResponse updateFee(Integer id, FeeRequest feeRequest);
 
+    FeeResponse approveFee(Integer id);
+
+    FeeResponse rejectFee(Integer id, String reason);
+
+    Page<FeeResponse> getPendingPayments(Pageable pageable);
+
     void deleteFee(Integer id);
 }

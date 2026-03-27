@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 import { studentsApi } from '../../api/students.api';
+import { useDebouncedSearchQuery } from '../../hooks/useDebouncedSearchQuery';
 import { Card, CardContent } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
@@ -16,21 +17,22 @@ import { MembershipStatus } from '../../types/api.types';
 import { masterApi } from '../../api/master.api';
 
 const PAGE_SIZE = 10;
-
+const SEARCH_DEBOUNCE_MS = 400;
+const SEARCH_MIN_LENGTH = 3;
 
 export default function StudentsPage() {
     const [page, setPage] = useState(0);
     const [tab, setTab] = useState<'all' | 'pending'>('all');
     const [editId, setEditId] = useState<number | null>(null);
     const [viewId, setViewId] = useState<number | null>(null);
-    const [tempFilters, setTempFilters] = useState({
-        query: '',
-        status: '' as string,
+
+    const [searchInput, setSearchInput, appliedSearchQuery] = useDebouncedSearchQuery({
+        debounceMs: SEARCH_DEBOUNCE_MS,
+        minLength: SEARCH_MIN_LENGTH,
     });
-    const [appliedFilters, setAppliedFilters] = useState({
-        query: '',
-        status: '' as string,
-    });
+
+    const [tempFilters, setTempFilters] = useState({ status: '' as string });
+    const [appliedFilters, setAppliedFilters] = useState({ status: '' as string });
     const toast = useToast();
     const queryClient = useQueryClient();
 
@@ -40,14 +42,19 @@ export default function StudentsPage() {
     });
 
     const { data: pageData, isLoading, isError } = useQuery({
-        queryKey: ['students', page, tab, appliedFilters],
-        queryFn: () =>
+        queryKey: ['students', page, tab, appliedSearchQuery, appliedFilters],
+        queryFn: ({ signal }) =>
             tab === 'pending'
                 ? studentsApi.getPendingStudents(page, PAGE_SIZE)
-                : studentsApi.getAllStudents(page, PAGE_SIZE, {
-                    query: appliedFilters.query || undefined,
-                    status: appliedFilters.status || undefined,
-                }),
+                : studentsApi.getAllStudents(
+                    page,
+                    PAGE_SIZE,
+                    {
+                        query: appliedSearchQuery || undefined,
+                        status: appliedFilters.status || undefined,
+                    },
+                    { signal }
+                ),
     });
 
     const deleteMutation = useMutation({
@@ -83,9 +90,9 @@ export default function StudentsPage() {
     };
 
     const resetFilters = () => {
-        const defaults = { query: '', status: '' };
-        setTempFilters(defaults);
-        setAppliedFilters(defaults);
+        setSearchInput('');
+        setTempFilters({ status: '' });
+        setAppliedFilters({ status: '' });
         setPage(0);
     };
 
@@ -105,9 +112,9 @@ export default function StudentsPage() {
                 <div className="bg-white p-4 rounded-xl shadow-sm ring-1 ring-secondary-200">
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <Input
-                            placeholder="Search name, code, phone..."
-                            value={tempFilters.query}
-                            onChange={(e) => setTempFilters({ ...tempFilters, query: e.target.value })}
+                            placeholder="Search name, code, phone (min 3 chars)..."
+                            value={searchInput}
+                            onChange={(e) => setSearchInput(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && applyFilters()}
                         />
                         <select

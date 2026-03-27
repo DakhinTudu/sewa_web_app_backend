@@ -1,10 +1,21 @@
 import api from './axios';
 import type { ApiResponse, StudentResponse, Page } from '../types/api.types';
 
+export interface StudentsRequestConfig {
+    signal?: AbortSignal;
+}
+
 export const studentsApi = {
-    getAllStudents: async (page = 0, size = 10, filters?: { query?: string; status?: string }): Promise<Page<StudentResponse>> => {
+    /** Pass signal to cancel previous in-flight request when search changes. */
+    getAllStudents: async (
+        page = 0,
+        size = 10,
+        filters?: { query?: string; status?: string },
+        config?: StudentsRequestConfig
+    ): Promise<Page<StudentResponse>> => {
         const response = await api.get<ApiResponse<Page<StudentResponse>>>('/students', {
             params: { page, size, ...filters },
+            signal: config?.signal,
         });
         return response.data.data;
     },

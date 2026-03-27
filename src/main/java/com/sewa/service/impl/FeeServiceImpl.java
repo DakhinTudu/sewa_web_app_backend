@@ -84,9 +84,19 @@ public class FeeServiceImpl implements FeeService {
                 .paymentStatus(status)
                 .financialYear(financialYear)
                 .remarks(feeRequest.getRemarks())
+                .paymentMethod(feeRequest.getPaymentMethod())
+                .screenshotUrl(feeRequest.getScreenshotUrl())
                 .build();
 
         MembershipFee savedFee = java.util.Objects.requireNonNull(feeRepository.save(fee));
+
+        // Update member status to ACTIVE if status is PAID and member is PENDING
+        if (status == com.sewa.entity.enums.PaymentStatus.PAID && member != null 
+                && member.getMembershipStatus() == com.sewa.entity.enums.MembershipStatus.PENDING) {
+            member.setMembershipStatus(com.sewa.entity.enums.MembershipStatus.ACTIVE);
+            memberRepository.save(member);
+        }
+
         return mapToResponse(savedFee);
     }
 
@@ -110,8 +120,45 @@ public class FeeServiceImpl implements FeeService {
             fee.setPaymentStatus(feeRequest.getStatus());
         if (feeRequest.getRemarks() != null)
             fee.setRemarks(feeRequest.getRemarks());
+        if (feeRequest.getPaymentMethod() != null)
+            fee.setPaymentMethod(feeRequest.getPaymentMethod());
+        if (feeRequest.getScreenshotUrl() != null)
+            fee.setScreenshotUrl(feeRequest.getScreenshotUrl());
 
         return mapToResponse(feeRepository.save(fee));
+    }
+
+    @Override
+    @Transactional
+    public FeeResponse approveFee(Integer id) {
+        MembershipFee fee = feeRepository.findById(id)
+                .orElseThrow(() -> new SewaException("Fee record not found"));
+        fee.setPaymentStatus(com.sewa.entity.enums.PaymentStatus.PAID);
+
+        // Update member status to ACTIVE if it was PENDING
+        Member member = fee.getMember();
+        if (member != null && member.getMembershipStatus() == com.sewa.entity.enums.MembershipStatus.PENDING) {
+            member.setMembershipStatus(com.sewa.entity.enums.MembershipStatus.ACTIVE);
+            memberRepository.save(member);
+        }
+
+        return mapToResponse(feeRepository.save(fee));
+    }
+
+    @Override
+    @Transactional
+    public FeeResponse rejectFee(Integer id, String reason) {
+        MembershipFee fee = feeRepository.findById(id)
+                .orElseThrow(() -> new SewaException("Fee record not found"));
+        fee.setPaymentStatus(com.sewa.entity.enums.PaymentStatus.REJECTED);
+        fee.setRejectionReason(reason);
+        return mapToResponse(feeRepository.save(fee));
+    }
+
+    @Override
+    public Page<FeeResponse> getPendingPayments(Pageable pageable) {
+        return feeRepository.searchFees(null, com.sewa.entity.enums.PaymentStatus.PENDING, null, pageable)
+                .map(this::mapToResponse);
     }
 
     @Override
@@ -139,6 +186,9 @@ public class FeeServiceImpl implements FeeService {
                 .status(fee.getPaymentStatus())
                 .paymentStatus(fee.getPaymentStatus())
                 .remarks(fee.getRemarks())
+                .paymentMethod(fee.getPaymentMethod())
+                .screenshotUrl(fee.getScreenshotUrl())
+                .rejectionReason(fee.getRejectionReason())
                 .createdAt(fee.getCreatedAt())
                 .updatedAt(fee.getUpdatedAt())
                 .build();

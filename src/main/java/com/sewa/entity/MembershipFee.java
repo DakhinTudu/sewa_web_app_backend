@@ -6,7 +6,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "membership_fees")
@@ -48,4 +48,13 @@ public class MembershipFee extends BaseEntity {
 
     @Column(name = "remarks", length = 500)
     private String remarks;
+
+    @Column(name = "payment_method")
+    private String paymentMethod; // UPI / BANK
+
+    @Column(name = "screenshot_url")
+    private String screenshotUrl;
+
+    @Column(name = "rejection_reason")
+    private String rejectionReason;
 }

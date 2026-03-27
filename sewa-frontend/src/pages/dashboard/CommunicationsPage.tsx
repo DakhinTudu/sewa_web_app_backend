@@ -12,12 +12,16 @@ import {
 } from '../../api/communications.api';
 import { chaptersApi } from '../../api/chapters.api';
 import { membersApi } from '../../api/members.api';
+import { useDebouncedSearchQuery } from '../../hooks/useDebouncedSearchQuery';
 import { Card, CardContent } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { useToast } from '../../components/ui/Toast';
 import { EnvelopeIcon, EyeIcon, PaperAirplaneIcon, ClockIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { Spinner } from '../../components/ui/Spinner';
+
+const SEARCH_DEBOUNCE_MS = 400;
+const SEARCH_MIN_LENGTH = 3;
 
 const BASE_OPTIONS = [
     { value: BASE_ALL, label: 'All active members (with email)' },
@@ -49,7 +53,10 @@ export default function CommunicationsPage() {
     const [chapterIds, setChapterIds] = useState<number[]>([]);
     const [paymentFilter] = useState(PAYMENT_UNPAID_CURRENT_YEAR);
     const [selectedMemberIds, setSelectedMemberIds] = useState<number[]>([]);
-    const [memberSearchQuery, setMemberSearchQuery] = useState('');
+    const [memberSearchInput, setMemberSearchInput, appliedMemberSearchQuery] = useDebouncedSearchQuery({
+        debounceMs: SEARCH_DEBOUNCE_MS,
+        minLength: SEARCH_MIN_LENGTH,
+    });
     const [memberSearchChapterId, setMemberSearchChapterId] = useState<number | ''>('');
     const [memberSearchStatus, setMemberSearchStatus] = useState('');
     const [memberSearchPage, setMemberSearchPage] = useState(0);
@@ -68,13 +75,18 @@ export default function CommunicationsPage() {
     });
 
     const { data: membersPage, isLoading: membersLoading } = useQuery({
-        queryKey: ['members-search', memberSearchPage, memberSearchQuery, memberSearchChapterId, memberSearchStatus],
-        queryFn: () =>
-            membersApi.getAllMembers(memberSearchPage, memberPageSize, {
-                query: memberSearchQuery.trim() || undefined,
-                chapterId: memberSearchChapterId === '' ? undefined : memberSearchChapterId,
-                status: memberSearchStatus || undefined,
-            }),
+        queryKey: ['members-search', memberSearchPage, appliedMemberSearchQuery, memberSearchChapterId, memberSearchStatus],
+        queryFn: ({ signal }) =>
+            membersApi.getAllMembers(
+                memberSearchPage,
+                memberPageSize,
+                {
+                    query: appliedMemberSearchQuery || undefined,
+                    chapterId: memberSearchChapterId === '' ? undefined : memberSearchChapterId,
+                    status: memberSearchStatus || undefined,
+                },
+                { signal }
+            ),
         enabled: baseType === BASE_MANUAL,
     });
     const members = membersPage?.content ?? [];
@@ -241,8 +253,8 @@ export default function CommunicationsPage() {
                                     <div className="flex-1 min-w-[180px]">
                                         <Input
                                             placeholder="Search by name, code, phone…"
-                                            value={memberSearchQuery}
-                                            onChange={(e) => setMemberSearchQuery(e.target.value)}
+                                            value={memberSearchInput}
+                                            onChange={(e) => setMemberSearchInput(e.target.value)}
                                             onKeyDown={(e) => e.key === 'Enter' && setMemberSearchPage(0)}
                                         />
                                     </div>

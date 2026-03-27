@@ -155,8 +155,12 @@ export interface MembershipFeeResponse {
     financialYear: string;
     amount: number;
     paymentDate: string;
-    paymentStatus: 'PAID' | 'PENDING' | 'OVERDUE' | 'FAILED';
-    receiptNumber: string;
+    paymentStatus: 'PAID' | 'PENDING' | 'FAILED' | 'REJECTED';
+    transactionId?: string;
+    receiptNumber?: string;
+    paymentMethod?: string;
+    screenshotUrl?: string;
+    rejectionReason?: string;
     remarks: string;
     createdAt: string;
     updatedAt: string;

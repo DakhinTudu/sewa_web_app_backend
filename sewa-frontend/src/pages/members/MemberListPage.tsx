@@ -8,6 +8,7 @@ import { Input } from '../../components/ui/Input';
 import { Modal } from '../../components/ui/Modal';
 import { Spinner } from '../../components/ui/Spinner';
 import { useToast } from '../../components/ui/Toast';
+import { useDebouncedSearchQuery } from '../../hooks/useDebouncedSearchQuery';
 import type { MemberResponse, ChapterResponse, MasterDataResponse } from '../../types/api.types';
 import { MembershipStatus } from '../../types/api.types';
 import { masterApi } from '../../api/master.api';
@@ -16,6 +17,8 @@ import { MagnifyingGlassIcon, EyeIcon, EllipsisVerticalIcon, CheckIcon, NoSymbol
 import { Dropdown } from '../../components/ui/Dropdown';
 import { StatusBadge } from '../../components/ui/StatusBadge';
 
+const SEARCH_DEBOUNCE_MS = 400;
+const SEARCH_MIN_LENGTH = 3;
 
 export default function MemberListPage() {
     const [page, setPage] = useState(0);
@@ -24,18 +27,21 @@ export default function MemberListPage() {
     const [viewId, setViewId] = useState<number | null>(null);
     const [filterOpen, setFilterOpen] = useState(false);
 
-    // Current filter states (what's actually applied to the query)
+    // Search: debounced 400ms, API only when length >= 3 or empty. Previous in-flight request cancelled via signal.
+    const [searchInput, setSearchInput, appliedSearchQuery] = useDebouncedSearchQuery({
+        debounceMs: SEARCH_DEBOUNCE_MS,
+        minLength: SEARCH_MIN_LENGTH,
+    });
+
+    // Filters applied on "Apply" (chapter, education, sector, status). Search is driven by hook above.
     const [appliedFilters, setAppliedFilters] = useState({
-        query: '',
         chapterId: '' as number | '',
         educationalLevel: '',
         workingSector: '',
         status: '' as MembershipStatus | '',
     });
 
-    // Temporary filter states (what's in the inputs)
     const [tempFilters, setTempFilters] = useState({
-        query: '',
         chapterId: '' as number | '',
         educationalLevel: '',
         workingSector: '',
@@ -46,6 +52,23 @@ export default function MemberListPage() {
     const toast = useToast();
     const queryClient = useQueryClient();
 
+    const { data, isLoading, isError } = useQuery({
+        queryKey: ['members', page, appliedSearchQuery, appliedFilters],
+        queryFn: ({ signal }) =>
+            membersApi.getAllMembers(
+                page,
+                pageSize,
+                {
+                    query: appliedSearchQuery || undefined,
+                    chapterId: appliedFilters.chapterId || undefined,
+                    educationalLevel: appliedFilters.educationalLevel || undefined,
+                    workingSector: appliedFilters.workingSector || undefined,
+                    status: appliedFilters.status || undefined,
+                },
+                { signal }
+            ),
+    });
+
     const { data: chapters } = useQuery({
         queryKey: ['chapters-list'],
         queryFn: chaptersApi.getAllChapters,
@@ -54,17 +77,6 @@ export default function MemberListPage() {
     const { data: masterData } = useQuery({
         queryKey: ['master-data'],
         queryFn: masterApi.getAllMasterData,
-    });
-
-    const { data, isLoading, isError } = useQuery({
-        queryKey: ['members', page, appliedFilters],
-        queryFn: () => membersApi.getAllMembers(page, pageSize, {
-            query: appliedFilters.query || undefined,
-            chapterId: appliedFilters.chapterId || undefined,
-            educationalLevel: appliedFilters.educationalLevel || undefined,
-            workingSector: appliedFilters.workingSector || undefined,
-            status: appliedFilters.status || undefined,
-        }),
     });
 
     const approveMutation = useMutation({
@@ -107,12 +119,12 @@ export default function MemberListPage() {
 
     const resetFilters = () => {
         const defaultFilters = {
-            query: '',
             chapterId: '' as number | '',
             educationalLevel: '',
             workingSector: '',
             status: '' as MembershipStatus | '',
         };
+        setSearchInput('');
         setTempFilters(defaultFilters);
         setAppliedFilters(defaultFilters);
         setPage(0);
@@ -311,10 +323,10 @@ export default function MemberListPage() {
                             </div>
                             <input
                                 type="text"
-                                placeholder="Search name, code, phone..."
+                                placeholder="Search name, code, phone (min 3 chars)..."
                                 className="block w-full pl-10 pr-3 py-2 border border-secondary-300 rounded-lg text-sm focus:ring-primary-500 focus:border-primary-500 transition-colors"
-                                value={tempFilters.query}
-                                onChange={(e) => setTempFilters({ ...tempFilters, query: e.target.value })}
+                                value={searchInput}
+                                onChange={(e) => setSearchInput(e.target.value)}
                                 onKeyDown={(e) => e.key === 'Enter' && applyFilters()}
                             />
                         </div>
@@ -376,9 +388,9 @@ export default function MemberListPage() {
                     <div>
                         <label className="block text-sm font-medium text-secondary-700 mb-1">Search</label>
                         <Input
-                            placeholder="Name, code, phone..."
-                            value={tempFilters.query}
-                            onChange={(e) => setTempFilters({ ...tempFilters, query: e.target.value })}
+                            placeholder="Name, code, phone (min 3 chars)"
+                            value={searchInput}
+                            onChange={(e) => setSearchInput(e.target.value)}
                         />
                     </div>
                     <div>

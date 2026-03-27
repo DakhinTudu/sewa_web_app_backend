@@ -11,6 +11,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 
+/**
+ * Member search uses prefix-only conditions (column ILIKE :query || '%') to allow index use.
+ * Optional indexes for production (run manually or via migration):
+ * CREATE INDEX idx_members_full_name_lower ON members (lower(full_name) varchar_pattern_ops);
+ * CREATE INDEX idx_members_membership_code_lower ON members (lower(membership_code) varchar_pattern_ops);
+ * CREATE INDEX idx_members_phone ON members (phone varchar_pattern_ops);
+ */
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Integer> {
         Optional<Member> findByMembershipCode(String membershipCode);
@@ -47,10 +54,10 @@ public interface MemberRepository extends JpaRepository<Member, Integer> {
                         "AND (:eduLevel IS NULL OR el.name = :eduLevel) " +
                         "AND (:sector IS NULL OR ws.name = :sector) " +
                         "AND (:status IS NULL OR m.membership_status = :status) " +
-                        "AND (:query IS NULL " +
-                        "  OR m.full_name ILIKE '%' || CAST(:query AS TEXT) || '%' " +
-                        "  OR m.membership_code ILIKE '%' || CAST(:query AS TEXT) || '%' " +
-                        "  OR m.phone ILIKE '%' || CAST(:query AS TEXT) || '%') " +
+                        "AND (:query IS NULL OR :query = '' " +
+                        "  OR m.full_name ILIKE CAST(:query AS TEXT) || '%' " +
+                        "  OR m.membership_code ILIKE CAST(:query AS TEXT) || '%' " +
+                        "  OR m.phone ILIKE CAST(:query AS TEXT) || '%') " +
                         "AND (m.is_deleted = FALSE OR m.is_deleted IS NULL) " +
                         "ORDER BY (CASE WHEN er.rep_id IS NOT NULL THEN 0 ELSE 1 END), m.created_at DESC",
                 countQuery = "SELECT COUNT(*) FROM members m " +
@@ -60,10 +67,10 @@ public interface MemberRepository extends JpaRepository<Member, Integer> {
                         "AND (:eduLevel IS NULL OR el.name = :eduLevel) " +
                         "AND (:sector IS NULL OR ws.name = :sector) " +
                         "AND (:status IS NULL OR m.membership_status = :status) " +
-                        "AND (:query IS NULL " +
-                        "  OR m.full_name ILIKE '%' || CAST(:query AS TEXT) || '%' " +
-                        "  OR m.membership_code ILIKE '%' || CAST(:query AS TEXT) || '%' " +
-                        "  OR m.phone ILIKE '%' || CAST(:query AS TEXT) || '%') " +
+                        "AND (:query IS NULL OR :query = '' " +
+                        "  OR m.full_name ILIKE CAST(:query AS TEXT) || '%' " +
+                        "  OR m.membership_code ILIKE CAST(:query AS TEXT) || '%' " +
+                        "  OR m.phone ILIKE CAST(:query AS TEXT) || '%') " +
                         "AND (m.is_deleted = FALSE OR m.is_deleted IS NULL)",
                 nativeQuery = true)
         Page<Member> searchMembersOrderByRepresentativeThenRecent(
@@ -81,23 +88,22 @@ public interface MemberRepository extends JpaRepository<Member, Integer> {
                         "AND (:eduLevel IS NULL OR el.name = :eduLevel) " +
                         "AND (:sector IS NULL OR ws.name = :sector) " +
                         "AND (:status IS NULL OR m.membership_status = :status) " +
-                        "AND (:query IS NULL " +
-                        "  OR m.full_name ILIKE '%' || CAST(:query AS TEXT) || '%' " +
-                        "  OR m.membership_code ILIKE '%' || CAST(:query AS TEXT) || '%' " +
-                        "  OR m.phone ILIKE '%' || CAST(:query AS TEXT) || '%') " +
-                        "AND (m.is_deleted = FALSE OR m.is_deleted IS NULL)", countQuery = "SELECT COUNT(*) FROM members m "
-                                        +
-                                        "LEFT JOIN educational_levels el ON el.id = m.educational_level_id " +
-                                        "LEFT JOIN working_sectors ws ON ws.id = m.working_sector_id " +
-                                        "WHERE (:chapterId IS NULL OR m.chapter_id = :chapterId) " +
-                                        "AND (:eduLevel IS NULL OR el.name = :eduLevel) " +
-                                        "AND (:sector IS NULL OR ws.name = :sector) " +
-                                        "AND (:status IS NULL OR m.membership_status = :status) " +
-                                        "AND (:query IS NULL " +
-                                        "  OR m.full_name ILIKE '%' || CAST(:query AS TEXT) || '%' " +
-                                        "  OR m.membership_code ILIKE '%' || CAST(:query AS TEXT) || '%' " +
-                                        "  OR m.phone ILIKE '%' || CAST(:query AS TEXT) || '%') " +
-                                        "AND (m.is_deleted = FALSE OR m.is_deleted IS NULL)", nativeQuery = true)
+                        "AND (:query IS NULL OR :query = '' " +
+                        "  OR m.full_name ILIKE CAST(:query AS TEXT) || '%' " +
+                        "  OR m.membership_code ILIKE CAST(:query AS TEXT) || '%' " +
+                        "  OR m.phone ILIKE CAST(:query AS TEXT) || '%') " +
+                        "AND (m.is_deleted = FALSE OR m.is_deleted IS NULL)", countQuery = "SELECT COUNT(*) FROM members m " +
+                        "LEFT JOIN educational_levels el ON el.id = m.educational_level_id " +
+                        "LEFT JOIN working_sectors ws ON ws.id = m.working_sector_id " +
+                        "WHERE (:chapterId IS NULL OR m.chapter_id = :chapterId) " +
+                        "AND (:eduLevel IS NULL OR el.name = :eduLevel) " +
+                        "AND (:sector IS NULL OR ws.name = :sector) " +
+                        "AND (:status IS NULL OR m.membership_status = :status) " +
+                        "AND (:query IS NULL OR :query = '' " +
+                        "  OR m.full_name ILIKE CAST(:query AS TEXT) || '%' " +
+                        "  OR m.membership_code ILIKE CAST(:query AS TEXT) || '%' " +
+                        "  OR m.phone ILIKE CAST(:query AS TEXT) || '%') " +
+                        "AND (m.is_deleted = FALSE OR m.is_deleted IS NULL)", nativeQuery = true)
         Page<Member> searchMembers(
                         @Param("chapterId") Integer chapterId,
                         @Param("eduLevel") String eduLevel,

@@ -1,15 +1,16 @@
 import { Link } from 'react-router-dom';
+import { Logo } from '../Logo';
 
 export default function Footer() {
     return (
-        <footer className="bg-gray-50 border-t border-gray-200">
+        <footer className="bg-gray-50 border-t border-gray-200 font-sans">
             <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                     {/* Brand / About */}
                     <div className="col-span-1 md:col-span-1">
-                        <div className="flex flex-col gap-2">
-                            <span className="text-xl font-bold text-primary-900 tracking-tight">SEWA</span>
-                            <p className="text-sm text-gray-500 leading-6">
+                        <div className="flex flex-col gap-4">
+                            <Logo variant="full" />
+                            <p className="text-sm text-gray-500 leading-6 font-medium">
                                 Santal Engineers Welfare Association.
                                 Building a stronger community through engineering and unity.
                             </p>
@@ -20,9 +21,9 @@ export default function Footer() {
                     <div className="col-span-1">
                         <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase mb-4">Quick Links</h3>
                         <ul className="space-y-3">
+                            <li><Link to="/" className="text-sm text-gray-600 hover:text-primary-600">Home</Link></li>
                             <li><Link to="/about" className="text-sm text-gray-600 hover:text-primary-600">About Us</Link></li>
-                            <li><Link to="/chapters" className="text-sm text-gray-600 hover:text-primary-600">Chapters</Link></li>
-                            <li><Link to="/publications" className="text-sm text-gray-600 hover:text-primary-600">Publications</Link></li>
+                            <li><Link to="/organization" className="text-sm text-gray-600 hover:text-primary-600">Our Organization</Link></li>
                             <li><Link to="/contact" className="text-sm text-gray-600 hover:text-primary-600">Contact</Link></li>
                         </ul>
                     </div>

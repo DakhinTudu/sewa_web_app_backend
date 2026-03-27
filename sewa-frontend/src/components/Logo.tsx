@@ -1,8 +1,6 @@
-/**
- * Dummy logo component. Replace with actual logo asset when available.
- * Usage: <Logo className="h-10 w-10" /> or <Logo variant="full" />
- */
 import { Link } from 'react-router-dom';
+
+const LOGO_URL = "https://raw.githubusercontent.com/DakhinTudu/sewa-assets/main/sewa-logo.png";
 
 interface LogoProps {
   className?: string;
@@ -10,29 +8,23 @@ interface LogoProps {
   linkTo?: string;
 }
 
-export function Logo({ className = 'h-10 w-10', variant = 'icon', linkTo = '/' }: LogoProps) {
-  const iconClass = variant === 'full' ? 'h-9 w-9 sm:h-10 sm:w-10 flex-shrink-0' : className;
+export function Logo({ className = 'h-10 w-auto', variant = 'icon', linkTo = '/' }: LogoProps) {
+  const iconClass = variant === 'full' ? 'h-10 w-auto object-contain' : `${className} object-contain`;
+  
   const icon = (
-    <svg
-      viewBox="0 0 40 40"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={iconClass}
-      aria-hidden="true"
-    >
-      <circle cx="20" cy="20" r="18" fill="#164a35" />
-      <text x="20" y="26" textAnchor="middle" fill="white" fontSize="16" fontWeight="bold" fontFamily="system-ui, sans-serif">
-        S
-      </text>
-    </svg>
+    <img 
+      src={LOGO_URL} 
+      alt="SEWA Logo" 
+      className={iconClass} 
+    />
   );
 
   const content = variant === 'full' ? (
-    <span className="inline-flex items-center gap-2">
+    <span className="inline-flex items-center gap-3">
       {icon}
       <span className="flex flex-col leading-tight">
-        <span className="text-lg font-bold text-primary-900 tracking-tight">SEWA</span>
-        <span className="text-[10px] text-gray-500 font-medium tracking-wide uppercase hidden sm:block">
+        <span className="text-xl font-bold text-primary-900 tracking-tight">SEWA</span>
+        <span className="text-[10px] text-gray-500 font-bold tracking-wider uppercase hidden sm:block">
           Santal Engineers Welfare Association
         </span>
       </span>
@@ -40,7 +32,7 @@ export function Logo({ className = 'h-10 w-10', variant = 'icon', linkTo = '/' }
   ) : icon;
 
   return linkTo ? (
-    <Link to={linkTo} className="flex items-center flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded">
+    <Link to={linkTo} className="flex items-center flex-shrink-0 focus:outline-none rounded shrink-0">
       {content}
     </Link>
   ) : (

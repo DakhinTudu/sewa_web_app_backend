@@ -35,4 +35,8 @@ public class FeeRequest {
     private String transactionId;
 
     private PaymentStatus status;
+
+    private String paymentMethod;
+    private String screenshotUrl;
+    private String rejectionReason;
 }

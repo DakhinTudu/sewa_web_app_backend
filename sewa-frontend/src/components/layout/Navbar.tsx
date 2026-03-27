@@ -6,11 +6,10 @@ import { Button } from '../ui/Button';
 import { useAuth } from '../../auth/AuthProvider';
 import { Logo } from '../Logo';
 
-const navigation = [
+const navigation = (isAuthenticated: boolean) => [
     { name: 'Home', href: '/' },
     { name: 'About', href: '/about' },
     { name: 'Organization', href: '/organization' },
-    { name: 'Notices', href: '/notices' },
     { name: 'Contact', href: '/contact' },
 ];
 
@@ -32,16 +31,16 @@ export default function Navbar() {
                         <div className="flex h-14 min-h-[3.5rem] sm:h-16 justify-between items-center">
                             <div className="flex items-center min-w-0">
                                 <Logo variant="full" />
-                                <div className="hidden lg:ml-10 lg:flex lg:space-x-8 items-center">
-                                    {navigation.map((item) => (
+                                <div className="hidden lg:ml-10 lg:flex lg:space-x-8 items-center h-full">
+                                    {navigation(isAuthenticated).map((item) => (
                                         <Link
                                             key={item.name}
                                             to={item.href}
                                             className={cn(
                                                 location.pathname === item.href
-                                                    ? 'border-primary-500 text-gray-900'
-                                                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
-                                                'inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium transition-colors duration-200 h-full'
+                                                    ? 'border-primary-500 text-gray-900 font-bold'
+                                                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 font-medium',
+                                                'inline-flex items-center border-b-2 px-2 pt-1 text-sm transition-all duration-200 h-full'
                                             )}
                                         >
                                             {item.name}
@@ -81,10 +80,9 @@ export default function Navbar() {
                             </div>
                         </div>
                     </div>
-
                     <DisclosurePanel className="lg:hidden">
                         <div className="space-y-1 pb-3 pt-2">
-                            {navigation.map((item) => (
+                            {navigation(isAuthenticated).map((item) => (
                                 <DisclosureButton
                                     key={item.name}
                                     as={Link}
